@@ -30,11 +30,6 @@ public class AuthService {
             // Check if the token is still valid based on last connection time and authTimeMins
             long minutesSinceLastConn = Duration.between(user.getLastConn(), LocalDateTime.now()).toMinutes();
             if (minutesSinceLastConn <= authConfig.getAuthTimeMins()) {
-                // Update last connection time to extend the session
-                if (minutesSinceLastConn >= 1) { // For optimization
-                    user.setLastConn(LocalDateTime.now());
-                    userRepository.save(user);
-                }
                 return true;
             }
         }
