@@ -24,7 +24,7 @@ public class AuthController {
 
             if (token.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("message", "Username already exists"));
+                        .body(Map.of("message", "Error registering user: Username already exists or first setup completed"));
             }
 
             return ResponseEntity.ok(Map.of("status", "ok", "token", token));

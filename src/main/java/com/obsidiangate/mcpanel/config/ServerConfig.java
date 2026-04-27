@@ -1,18 +1,44 @@
 package com.obsidiangate.mcpanel.config;
 
+import com.obsidiangate.mcpanel.model.ServerConfigModel;
+import com.obsidiangate.mcpanel.repository.ServerConfigRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Data
-@Getter
-@Setter
 public class ServerConfig {
-    private int maxGbRam = 16; // Max GB of RAM that can be allocated to the server
-    private String name = "ObsidianServer"; // Name of the server
-    private String description = "ObsidianServer"; // Description of the server
-    private int renderDistance = 16; // Minecraft chunk loading distance
-    private int simulationDistance = 16; // Minecrfat chunk simulation distance
+
+    @Autowired
+    private ServerConfigRepository serverConfigRepository;
+
+    private boolean firstSetup;
+    private int maxGbRam;
+    private String name;
+    private String description;
+    private int renderDistance;
+    private int simulationDistance;
+
+    @PostConstruct
+    public void init() {
+        refresh();
+    }
+
+    public void refresh() {
+        ServerConfigModel model = serverConfigRepository.findActiveConfig();
+
+        if (model != null) {
+            this.firstSetup = model.isFirstSetup();
+            this.maxGbRam = model.getMaxGbRam();
+            this.name = model.getName();
+            this.description = model.getDescription();
+            this.renderDistance = model.getRenderDistance();
+            this.simulationDistance = model.getSimulationDistance();
+        } else {
+            this.maxGbRam = 2;
+            this.name = "Nuevo Servidor";
+        }
+    }
 }
