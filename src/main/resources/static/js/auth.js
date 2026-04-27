@@ -13,7 +13,7 @@ async function login(username, password) {
         if (response.ok && data.status === "ok") {
             localStorage.setItem('mc_token', data.token);
             localStorage.setItem('mc_user', username);
-            window.location.href = "../view/dashboard.html";
+            window.location.href = "../view/panel.html";
         } else {
             alert(data.message || "Incorrect username or password");
         }

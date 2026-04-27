@@ -67,19 +67,14 @@
             return;
         }
 
-        btn.innerText = "Creating account...";
         btn.disabled = true;
         errorDiv.innerText = "";
 
         try {
-
             await register(user, pass);
-
-            btn.innerText = "Sign in";
             btn.disabled = false;
         } catch (err) {
             errorDiv.innerText = "Server error";
-            btn.innerText = "Sign in";
             btn.disabled = false;
         }
     }

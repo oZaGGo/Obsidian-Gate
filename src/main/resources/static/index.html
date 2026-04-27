@@ -51,18 +51,14 @@
             return;
         }
 
-        btn.innerText = "Logging in...";
         btn.disabled = true;
         errorDiv.innerText = "";
 
         try {
-
             await login(user, pass);
-            btn.innerText = "Redirecting...";
             btn.disabled = false;
         } catch (err) {
             errorDiv.innerText = "Server error";
-            btn.innerText = "Login";
             btn.disabled = false;
         }
     }
