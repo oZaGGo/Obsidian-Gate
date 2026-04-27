@@ -5,7 +5,7 @@ const router = {
         try {
             const response = await fetch(`../view/section/${viewName}.html`);
 
-            if (!response.ok) throw new Error("Vista no encontrada");
+            if (!response.ok) throw new Error("Section not found!");
 
             const html = await response.text();
 
@@ -51,4 +51,39 @@ document.addEventListener('DOMContentLoaded', () => {
 function logout() {
     localStorage.clear();
     window.location.href = "../index.html";
+}
+
+// HOME
+
+/**
+ * Update CPU usage display
+ * @param {number} percent - 0 - 100
+ */
+function updateCPU(percent) {
+    const card = document.querySelector('.stat-card:nth-child(1)');
+    const text = document.getElementById('cpu-usage');
+    const fill = card.querySelector('.progress-fill');
+
+
+    text.innerText = `${percent}%`;
+    fill.style.width = `${percent}%`;
+
+    if (percent > 80) fill.style.background = '#e74c3c';
+    else if (percent > 50) fill.style.background = '#f1c40f';
+    else fill.style.background = 'var(--accent)';
+}
+
+/**
+ * Update RAM usage display
+ * @param {number} used - GB used
+ * @param {number} total - GB total
+ */
+function updateRAM(used, total) {
+    const percent = (used / total) * 100;
+    const card = document.querySelector('.stat-card:nth-child(2)'); // Segunda tarjeta
+    const text = document.getElementById('ram-usage');
+    const fill = card.querySelector('.progress-fill');
+
+    text.innerHTML = `${used.toFixed(1)} GB <span class="total-ram">/ ${total} GB</span>`;
+    fill.style.width = `${percent}%`;
 }

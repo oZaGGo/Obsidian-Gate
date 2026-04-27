@@ -1,13 +1,53 @@
 <div class="fade-in">
-    <h1>Panel de Control</h1>
+    <div class="header-section">
+        <h1>Estado del Sistema</h1>
+        <div class="status-indicator">
+            <span class="dot" id="server-status-dot"></span>
+            <span id="server-status-text">ONLINE</span>
+        </div>
+    </div>
+
     <div class="stats-grid">
         <div class="stat-card">
-            <h3>Servidores Activos</h3>
-            <p class="stat-value">3</p>
+            <h3>CPU Usage</h3>
+            <p class="stat-value" id="cpu-usage">0%</p>
+            <div class="progress-bar">
+                <div id="bar-cpu" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>RAM Usage</h3>
+            <p class="stat-value" id="ram-usage">0 GB <span class="total-ram">/ 0 GB</span></p>
+            <div class="progress-bar">
+                <div id="bar-ram" class="progress-fill" style="width: 0%"></div>
+            </div>
         </div>
         <div class="stat-card">
-            <h3>Consumo RAM</h3>
-            <p class="stat-value">4.2 GB</p>
+            <h3>Uptime</h3>
+            <p class="stat-value" id="status">MOCK</p>
+        </div>
+    </div>
+
+    <div class="control-actions">
+        <button class="btn btn-start" onclick="controlServer('start')">▶ Start</button>
+        <button class="btn btn-restart" onclick="controlServer('restart')">🔄 Restart</button>
+        <button class="btn btn-stop" onclick="controlServer('stop')">⏹ Stop</button>
+    </div>
+
+    <div class="console-container">
+        <div class="console-header">
+            <span>Terminal Output</span>
+            <button class="btn-clear" onclick="clearConsole()">Clear</button>
+        </div>
+        <div class="console-body" id="console-output">
+            <p class="line">[14:20:01] [Server thread/INFO]: Starting minecraft server version 1.20.1</p>
+            <p class="line">[14:20:05] [Server thread/INFO]: Loading properties...</p>
+            <p class="line">[14:20:10] [Server thread/INFO]: Done (9.452s)! For help, type "help"</p>
+        </div>
+        <div class="console-input">
+            <span class="prompt">></span>
+            <input type="text" placeholder="Send command..." id="cmd-input" onkeypress="if(event.key === 'Enter') sendCommand()">
         </div>
     </div>
 </div>

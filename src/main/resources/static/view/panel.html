@@ -19,23 +19,26 @@
             <button onclick="router.load('home')" class="menu-item active">
                 <i>🏠</i> Home
             </button>
-            <button onclick="router.load('servidores')" class="menu-item">
+            <button onclick="router.load('servers')" class="menu-item">
                 <i>🖥️</i> Server
             </button>
-            <button onclick="router.load('usuarios')" class="menu-item">
+            <button onclick="router.load('users')" class="menu-item">
                 <i>👥</i> Users
             </button>
-            <button onclick="router.load('ajustes')" class="menu-item">
+            <button onclick="router.load('settings')" class="menu-item">
                 <i>⚙️</i> Settings
             </button>
         </nav>
 
         <div class="sidebar-user">
             <div class="user-info">
-                <p id="txt-username">Cargando...</p>
+                <p id="txt-username">Loading...</p>
                 <small>Admin</small>
             </div>
             <button onclick="logout()" class="btn-logout">Log out</button>
+            <div class="credits">
+                <p>Created by <a href="https://github.com/oZaGGo" target="_blank">@ZaGG</a></p>
+            </div>
         </div>
     </aside>
 
