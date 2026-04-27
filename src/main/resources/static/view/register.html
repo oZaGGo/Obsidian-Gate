@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObsidianGate - Register</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/auth/auth.css">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-box">
+        <h1>ObsidianGate</h1>
+        <p>Join ObsidianGate's panel</p>
+
+        <div class="input-group">
+            <label for="reg-username">New user</label>
+            <input type="text" id="reg-username" placeholder="Choose an username">
+        </div>
+
+        <div class="input-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" placeholder="At least 8 characters">
+        </div>
+
+        <div class="input-group">
+            <label for="reg-password-confirm">Confirm password</label>
+            <input type="password" id="reg-password-confirm" placeholder="Type your password again">
+        </div>
+
+        <button id="btnRegister" onclick="handleRegister()">Sign in</button>
+
+        <div id="error-msg" class="error-msg"></div>
+
+        <div class="footer-links">
+            <p>Already have an account? <a href="../index.html">Log in here</a></p>
+        </div>
+    </div>
+</div>
+
+<script src="../js/auth.js"></script>
+
+<script>
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleRegister();
+    });
+
+    async function handleRegister() {
+        const user = document.getElementById('reg-username').value;
+        const pass = document.getElementById('reg-password').value;
+        const passConfirm = document.getElementById('reg-password-confirm').value;
+        const errorDiv = document.getElementById('error-msg');
+        const btn = document.getElementById('btnRegister');
+
+        if(!user || !pass || !passConfirm) {
+            errorDiv.innerText = "Please fill in all fields!";
+            return;
+        }
+
+        if(pass !== passConfirm) {
+            errorDiv.innerText = "Passwords dont match!";
+            return;
+        }
+
+        if(pass.length < 8) {
+            errorDiv.innerText = "Password too short!";
+            return;
+        }
+
+        btn.innerText = "Creating account...";
+        btn.disabled = true;
+        errorDiv.innerText = "";
+
+        try {
+
+            await register(user, pass);
+
+            btn.innerText = "Sign in";
+            btn.disabled = false;
+        } catch (err) {
+            errorDiv.innerText = "Server error";
+            btn.innerText = "Sign in";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

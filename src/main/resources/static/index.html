@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObsidianGate - Login</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/auth/auth.css">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-box">
+        <h1>ObsidianGate</h1>
+        <p>A Minecraft control panel</p>
+
+        <div class="input-group">
+            <label for="username">User</label>
+            <input type="text" id="username" placeholder="Username">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button id="btnLogin" onclick="handleLogin()">Login</button>
+
+        <div id="error-msg" class="error-msg"></div>
+
+        <div class="footer-links">
+            <p>Have you created an account? <a href="view/register.html">Sign in</a></p>
+        </div>
+    </div>
+</div>
+
+<script src="js/auth.js"></script>
+
+<script>
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+
+    async function handleLogin() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const errorDiv = document.getElementById('error-msg');
+        const btn = document.getElementById('btnLogin');
+
+        if(!user || !pass) {
+            errorDiv.innerText = "Please fill in all fields";
+            return;
+        }
+
+        btn.innerText = "Logging in...";
+        btn.disabled = true;
+        errorDiv.innerText = "";
+
+        try {
+
+            await login(user, pass);
+            btn.innerText = "Redirecting...";
+            btn.disabled = false;
+        } catch (err) {
+            errorDiv.innerText = "Server error";
+            btn.innerText = "Login";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
