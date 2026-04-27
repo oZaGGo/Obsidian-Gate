@@ -1,4 +1,4 @@
-package com.obsidiangate.mc_panel;
+package com.obsidiangate.mcpanel;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
