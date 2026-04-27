@@ -84,9 +84,12 @@ public class ServerRuntimeController {
         }
 
         boolean isRunning = serverService.isRunning();
+        String runtime = serverService.getUptime();
+
         return ResponseEntity.ok(Map.of(
                 "status", isRunning ? "ONLINE" : "OFFLINE",
-                "running", isRunning
+                "running", isRunning,
+                "uptime", runtime
         ));
     }
 }

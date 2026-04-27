@@ -20,6 +20,8 @@ public class ServerRuntimeService {
     private final String serverPath = Paths.get(System.getProperty("user.dir"), "mc_server").toString();
     private final String jarName = "server.jar";
 
+    private long startTime = 0;
+
     public void startServer() throws IOException {
         if (serverProcess != null && serverProcess.isAlive()) {
             return;
@@ -41,6 +43,7 @@ public class ServerRuntimeService {
         pb.redirectErrorStream(true);
 
         this.serverProcess = pb.start();
+        this.startTime = System.currentTimeMillis();
 
         //Console loggin
 
@@ -101,5 +104,21 @@ public class ServerRuntimeService {
 
     public boolean isRunning() {
         return serverProcess != null && serverProcess.isAlive();
+    }
+
+    public String getUptime() {
+        if (serverProcess == null || !serverProcess.isAlive()) {
+            this.startTime = 0;
+            return "00:00:00";
+        }
+
+        long now = System.currentTimeMillis();
+        long diff = now - this.startTime;
+
+        long seconds = (diff / 1000) % 60;
+        long minutes = (diff / (1000 * 60)) % 60;
+        long hours = (diff / (1000 * 60 * 60));
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 }

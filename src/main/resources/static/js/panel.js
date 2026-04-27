@@ -11,10 +11,6 @@ const router = {
 
             container.innerHTML = html;
 
-            this.updateActiveMenu(viewName);
-
-            this.initViewLogic(viewName);
-
         } catch (error) {
             container.innerHTML = `
                 <div class="error-view">
@@ -22,21 +18,18 @@ const router = {
                     <p>Section not available: ${viewName}</p>
                 </div>`;
         }
+
+        this.updateActiveMenu(viewName);
     },
 
     updateActiveMenu(viewName) {
         document.querySelectorAll('.menu-item').forEach(btn => {
             btn.classList.remove('active');
-            if (btn.getAttribute('onclick').includes(viewName)) {
+            const clickHandler = btn.getAttribute('onclick');
+            if (clickHandler && clickHandler.includes(`'${viewName}'`)) {
                 btn.classList.add('active');
             }
         });
-    },
-
-    initViewLogic(viewName) {
-        if (viewName === 'servidores') {
-            console.log("Iniciando carga de servidores...");
-        }
     }
 };
 
@@ -210,6 +203,8 @@ async function sendCommand() {
 async function checkServerStatus() {
     const dot = document.getElementById('server-status-dot');
     const text = document.getElementById('server-status-text');
+    const uptimeText = document.getElementById('status');
+
     if (!dot || !text) return;
 
     try {
@@ -223,6 +218,11 @@ async function checkServerStatus() {
             text.innerText = "ONLINE";
             text.style.color = "#2ecc71";
             online = true;
+
+            if (uptimeText) {
+                uptimeText.innerText = data.uptime;
+            }
+
         } else {
             dot.style.background = "#e74c3c";
             text.innerText = "OFFLINE";
