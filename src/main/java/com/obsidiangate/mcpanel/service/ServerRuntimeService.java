@@ -80,10 +80,10 @@ public class ServerRuntimeService {
             try {
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(serverProcess.getOutputStream()));
                 writer.write(command);
-                writer.newLine(); // IMPORTANTE: Sin el salto de línea, el server no sabe que el comando terminó
+                writer.newLine();
                 writer.flush();
             } catch (IOException e) {
-                System.err.println("Error al enviar comando: " + e.getMessage());
+                System.err.println("Error sending command: " + e.getMessage());
             }
         }
     }
