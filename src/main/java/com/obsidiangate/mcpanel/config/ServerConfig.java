@@ -41,8 +41,15 @@ public class ServerConfig {
             this.maxPlayers = model.getMaxPlayers();
             this.rconPort = model.getRconPort();
         } else {
+            // If bd is empty
+            this.firstSetup = true;
             this.maxGbRam = 2;
-            this.name = "Nuevo Servidor";
+            this.name = "ObsidianGate Server";
+            this.description = "Server managed by ObsidianGate";
+            this.renderDistance = 16;
+            this.simulationDistance = 10;
+            this.maxPlayers = 20;
+            this.rconPort = 25575;
         }
     }
 }

@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
 
         if (document.getElementById('cpu-usage')) {
+            checkSession();
             if (online){
                 refreshMetrics()
             }

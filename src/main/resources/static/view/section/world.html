@@ -1,0 +1,85 @@
+<div class="fade-in settings-container">
+    <div class="header-section">
+        <h1>World Management</h1>
+    </div>
+
+    <div class="settings-grid">
+        <div class="settings-card full-width">
+            <h3>Current world Settings</h3>
+            <div class="world-config-form">
+                <div class="form-group">
+                    <label>World Name</label>
+                    <input type="text" id="world-name" placeholder="world">
+                </div>
+                <div class="form-group">
+                    <label>Seed</label>
+                    <input type="text" id="world-seed" placeholder="Random seed if empty">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Difficulty</label>
+                        <select id="world-difficulty">
+                            <option value="peaceful">Peaceful</option>
+                            <option value="easy">Easy</option>
+                            <option value="normal">Normal</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Gamemode</label>
+                        <select id="world-gamemode">
+                            <option value="survival">Survival</option>
+                            <option value="creative">Creative</option>
+                            <option value="adventure">Adventure</option>
+                            <option value="spectator">Spectator</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="world-hardcore"> Hardcore Mode
+                    </label>
+                </div>
+
+                <div class="form-group" style="align-items: flex-end; margin-top: 10px;">
+                    <button class="btn btn-save-small" onclick="saveWorldConfig()">Save World Config</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-card mt-20">
+        <h3>Worlds list</h3>
+        <div class="world-list-container">
+            <table class="world-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Gamemode</th>
+                    <th>Difficulty</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="world-list-body">
+                <tr>
+                    <td>world_survival</td>
+                    <td><span class="badge badge-gm">Survival</span></td>
+                    <td><span class="badge badge-diff">Hard</span></td>
+                    <td><span class="status-active">Active</span></td>
+                    <td><button class="btn-select-disabled" disabled>Default</button></td>
+                </tr>
+                <tr>
+                    <td>creative_flat</td>
+                    <td><span class="badge badge-gm">Creative</span></td>
+                    <td><span class="badge badge-diff">Peaceful</span></td>
+                    <td><span class="status-inactive">Inactive</span></td>
+                    <td><button class="btn-select" onclick="setWorldDefault('creative_flat')">Set Default</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

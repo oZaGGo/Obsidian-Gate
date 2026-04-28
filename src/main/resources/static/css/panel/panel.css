@@ -243,7 +243,6 @@ h1 {
     letter-spacing: 1px;
 }
 
-/* Grupos de Formulario */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -365,4 +364,90 @@ h1 {
 
 .btn-save-small:active {
     transform: translateY(0);
+}
+
+
+/* WORLDS CONFIG */
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.world-config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.world-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.world-table th {
+    text-align: left;
+    color: var(--accent);
+    padding: 12px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.world-table td {
+    padding: 12px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.1);
+}
+
+.status-active { color: #50fa7b; font-weight: bold; }
+.status-inactive { color: #ff5555; }
+
+.btn-select {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-select:hover {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-select-disabled {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #666;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.mt-20 { margin-top: 20px; }
+
+select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
 }
