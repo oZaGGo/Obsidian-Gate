@@ -2,11 +2,15 @@ package com.obsidiangate.mcpanel.controller;
 
 import com.obsidiangate.mcpanel.dto.UserDTO;
 import com.obsidiangate.mcpanel.service.AuthService;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +21,13 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    private final Bucket bucket;
+
+    public AuthController() {
+        Bandwidth limit = Bandwidth.classic(5, Refill.intervally(1, Duration.ofMinutes(3)));
+        this.bucket = Bucket.builder().addLimit(limit).build();
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
@@ -38,14 +49,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
 
-        String token = authService.login(userDTO);
-
-        if (!token.isEmpty()) {
-            return ResponseEntity.ok(Map.of("status", "ok", "token", token));
+        if (bucket.tryConsume(1)) {
+            String token = authService.login(userDTO);
+            if (!token.isEmpty()) {
+                return ResponseEntity.ok(Map.of("status", "ok", "token", token));
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid credentials"));
+        } else {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("message", "Too many attempts. Try again in a few minutes."));
         }
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "Invalid credentials"));
     }
 
     @GetMapping("/validate")
