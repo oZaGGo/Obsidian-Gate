@@ -51,6 +51,11 @@
             return;
         }
 
+        if (pass.length < 8) {
+            errorDiv.innerText = "Password must be at least 8 characters";
+            return;
+        }
+
         btn.disabled = true;
         errorDiv.innerText = "";
 

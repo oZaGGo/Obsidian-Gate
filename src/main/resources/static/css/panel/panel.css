@@ -518,7 +518,7 @@ select:focus {
 }
 
 select option {
-    background-color: #1e1e1e; /* Color sólido para que no sea blanco */
+    background-color: #1e1e1e;
     color: white;
     padding: 10px;
 }
@@ -536,4 +536,29 @@ input[type="text"] {
 input[type="text"]:focus {
     border-color: var(--accent);
     box-shadow: 0 0 8px rgba(189, 147, 249, 0.3);
+}
+
+
+/* SECURITY */
+
+.btn-delete {
+    background: rgba(218, 100, 89, 0.2);
+    color: #da6459;
+    border: 1px solid #da6459;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-delete:hover {
+    background: #da6459;
+    color: white;
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
 }

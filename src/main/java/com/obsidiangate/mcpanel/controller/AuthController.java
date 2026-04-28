@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -55,4 +56,41 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("status", "invalid"));
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestHeader("Authorization") String token) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(authService.getAllUsers());
+    }
+
+    @PostMapping("/manager")
+    public ResponseEntity<?> createManager(@RequestHeader("Authorization") String token, @RequestBody UserDTO userDTO) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Unauthorized"));
+        }
+
+        try {
+            authService.createManager(userDTO, token);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", "ok", "message", "Manager created successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/user/{username}")
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token, @PathVariable String username) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Unauthorized"));
+        }
+
+        try {
+            authService.deleteManager(username, token);
+            return ResponseEntity.ok(Map.of("status", "ok", "message", "User deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        }
+    }
+
 }

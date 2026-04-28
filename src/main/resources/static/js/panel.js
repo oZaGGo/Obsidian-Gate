@@ -44,13 +44,18 @@ const router = {
         if (viewName === 'world') {
             loadWorldView()
         }
+        if (viewName === 'security') {
+            loadUsers()
+        }
     }
 };
 
 let online = false;
 
 document.addEventListener('DOMContentLoaded', () => {
+
     checkSession();
+
     document.getElementById('txt-username').innerText = localStorage.getItem('mc_user') || 'User';
 
     router.load('home');
@@ -544,5 +549,119 @@ async function setWorldDefault(worldName) {
         }
     } catch (error) {
         console.error("Error setting default world:", error);
+    }
+}
+
+// Security
+
+async function loadUsers() {
+    const userListBody = document.getElementById('user-list-body');
+    if (!userListBody) return;
+
+    try {
+        const response = await fetch('/api/auth/users', {
+            headers: { 'Authorization': localStorage.getItem('mc_token') }
+        });
+
+        if (!response.ok) throw new Error("Could not fetch users");
+
+        const users = await response.json();
+
+        userListBody.innerHTML = users.map(user => {
+            const roleBadge = user.admin
+                ? `<span class="badge" style="background: #da6459; color: white;">ADMIN</span>`
+                : `<span class="badge" style="background: #7ebbee; color: white;">MANAGER</span>`;
+
+            const lastConn = user.lastConn
+                ? new Date(user.lastConn).toLocaleString()
+                : '<span style="color: #666">Never</span>';
+
+            const actionButton = user.admin
+                ? `<button class="btn-select-disabled" disabled>Protected</button>`
+                : `<button class="btn-delete" onclick="deleteUser('${user.username}')">
+                     <i class="fas fa-trash"></i> Remove
+                   </button>`;
+
+            return `
+                <tr>
+                    <td>${user.admin ? `<strong>${user.username}</strong>` : user.username}</td>
+                    <td>${roleBadge}</td>
+                    <td>${lastConn}</td>
+                    <td style="text-align: right;">${actionButton}</td>
+                </tr>
+            `;
+        }).join('');
+
+    } catch (e) {
+        console.error("Error loading users:", e);
+    }
+}
+
+async function createNewManager() {
+    const nameInput = document.getElementById('new-user-name');
+    const passInput = document.getElementById('new-user-password');
+
+    const username = nameInput.value.trim();
+    const password = passInput.value.trim();
+
+    if (!username || !password) {
+        alert("Please fill in all fields");
+        return;
+    }
+
+    if (password.length < 8) {
+        alert("Password must be at least 8 characters long");
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/manager', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('mc_token')
+            },
+            body: JSON.stringify({ username, password, isAdmin: false })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Limpiar inputs
+            nameInput.value = '';
+            passInput.value = '';
+            // Recargar tabla
+            loadUsers();
+            alert("Manager created successfully");
+        } else {
+            alert(data.message || "Error creating manager");
+        }
+    } catch (e) {
+        console.error("Error:", e);
+        alert("Connection error");
+    }
+}
+
+async function deleteUser(username) {
+    if (!confirm(`Are you sure you want to remove access for ${username}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/auth/user/${username}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': localStorage.getItem('mc_token') }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            loadUsers();
+        } else {
+            alert(data.message || "Error deleting user");
+        }
+    } catch (e) {
+        console.error("Error:", e);
+        alert("Connection error");
     }
 }

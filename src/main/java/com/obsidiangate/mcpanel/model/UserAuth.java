@@ -26,4 +26,7 @@ public class UserAuth {
     @Column(name = "last_conn")
     private LocalDateTime lastConn;
 
+    @Column(nullable = false)
+    private boolean isAdmin;
+
 }

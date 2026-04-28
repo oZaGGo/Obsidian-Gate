@@ -1,0 +1,52 @@
+<div class="fade-in settings-container">
+    <div class="header-section">
+        <h1>Security & Access Control</h1>
+    </div>
+
+    <div class="settings-grid">
+        <div class="settings-card full-width">
+            <div class="card-header-flex" style="display: flex; align-items: baseline; justify-content: space-between; gap: 15px; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Add New Manager</h3>
+                <span class="info-text" style="font-size: 0.8rem; color: rgba(255,255,255,0.5); font-style: italic;">
+                    Note: Managers cannot delete or create other users.
+                </span>
+            </div>
+
+            <div class="user-config-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Username <i style="color: #f26d6d">*</i></label>
+                        <input type="text" id="new-user-name" placeholder="username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password <i style="color: #f26d6d">*</i></label>
+                        <input type="text" id="new-user-password" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="form-group" style="align-items: flex-end; margin-top: 10px;">
+                    <button class="btn btn-save-small" onclick="createNewManager()">Grant access</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-card mt-20">
+        <h3>User Access List</h3>
+        <div class="world-list-container">
+            <table class="world-table">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Last login</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="user-list-body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

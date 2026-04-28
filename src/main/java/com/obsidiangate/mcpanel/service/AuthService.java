@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -49,7 +51,7 @@ public class AuthService {
 
     public String register(UserDTO userDto){
 
-        if (userRepository.findByUsername(userDto.getUsername()).isPresent() || !serverConfig.isFirstSetup()) {
+        if (userRepository.findByUsername(userDto.getUsername()).isPresent() || !serverConfig.isFirstSetup() || userDto.getPassword().length() < 8) {
             return "";
         }
 
@@ -58,6 +60,7 @@ public class AuthService {
         user.setPassword(userDto.getPassword());
         user.setToken(UUID.randomUUID().toString());
         user.setLastConn(LocalDateTime.now());
+        user.setAdmin(true);
 
         userRepository.save(user);
 
@@ -65,6 +68,7 @@ public class AuthService {
         ServerConfigModel config = serverConfigRepository.findActiveConfig();
         config.setFirstSetup(false);
         serverConfigRepository.save(config);
+        serverConfig.refresh();
 
         return user.getToken();
     }
@@ -84,5 +88,60 @@ public class AuthService {
 
         return "";
 
+    }
+
+    public boolean createManager(UserDTO userDto, String token) {
+
+        if (userRepository.findByUsername(userDto.getUsername()).isPresent() || userDto.getPassword().length() < 8) {
+            return false;
+        }
+
+        UserAuth autor = userRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid autor"));
+
+        if (!autor.isAdmin()) {
+            throw new RuntimeException("Not authorized to create this user");
+        }
+
+        UserAuth user = new UserAuth();
+        user.setUsername(userDto.getUsername());
+        user.setPassword(userDto.getPassword());
+        user.setAdmin(false);
+        user.setToken(UUID.randomUUID().toString());
+        user.setLastConn(LocalDateTime.now());
+
+        userRepository.save(user);
+        return true;
+    }
+
+    public void deleteManager(String username, String token) {
+        UserAuth user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserAuth autor = userRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid autor"));
+
+        if (user.isAdmin() || !autor.isAdmin()) {
+            throw new RuntimeException("Not authorized to delete this user");
+        }
+
+        userRepository.delete(user);
+    }
+
+
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private UserDTO convertToDTO(UserAuth user) {
+        UserDTO dto = new UserDTO();
+        dto.setUsername(user.getUsername());
+        dto.setPassword(null);
+        dto.setToken(null);
+        dto.setAdmin(user.isAdmin());
+        dto.setLastConn(user.getLastConn());
+        return dto;
     }
 }
