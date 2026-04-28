@@ -231,6 +231,7 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    min-height: 0;
 }
 
 .settings-card h3 {
@@ -388,24 +389,67 @@ h1 {
     flex: 1;
 }
 
+.world-list-container {
+    max-height: 50dvh;
+    overflow-y: auto;
+    margin-top: 10px;
+    padding-right: 5px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) rgba(255, 255, 255, 0.05);
+}
+
+.world-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.world-list-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.world-list-container::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
 .world-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin-top: 10px;
 }
 
 .world-table th {
+    position: sticky;
+    top: 0;
+    background: #1e1e1e;
+    z-index: 10;
     text-align: left;
     color: var(--accent);
     padding: 12px;
     font-size: 0.85rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 2px solid rgba(255,255,255,0.1);
 }
 
 .world-table td {
     padding: 12px;
     font-size: 0.9rem;
     border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.btn-delete {
+    background: transparent;
+    border: 1px solid #ff5555;
+    color: #ff5555;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-delete:hover {
+    background: #ff5555;
+    color: white;
 }
 
 .badge {

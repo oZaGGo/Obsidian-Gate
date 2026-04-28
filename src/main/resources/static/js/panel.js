@@ -420,19 +420,45 @@ function renderWorldTable(worlds) {
             <td>${w.nombre}</td>
             <td><span class="badge badge-gm">${w.gamemode}</span></td>
             <td><span class="badge badge-diff">${w.difficulty}</span></td>
-            <td>${w.hardcore}</td> <td>
+            <td>${w.hardcore}</td>
+            <td>
                 <span class="${w.current ? 'status-active' : 'status-inactive'}">
                     ${w.current ? 'Active' : 'Inactive'}
                 </span>
             </td>
             <td>
-                ${w.current
+                <div style="display: flex; gap: 8px;">
+                    ${w.current
             ? '<button class="btn-select-disabled" disabled>Default</button>'
             : `<button class="btn-select" onclick="setWorldDefault('${w.nombre}')">Set Default</button>`}
+                    
+                    ${!w.current
+            ? `<button class="btn-delete" onclick="deleteWorld('${w.nombre}')">Delete</button>`
+            : ''}
+                </div>
             </td>
         `;
         tbody.appendChild(row);
     });
+}
+
+async function deleteWorld(worldName) {
+    if (!confirm(`Are you sure you want to delete the world "${worldName}"?`)) return;
+
+    try {
+        const response = await fetch(`/api/world/delete?name=${worldName}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': localStorage.getItem('mc_token') }
+        });
+
+        if (response.ok) {
+            loadWorldView(); // Recargar tabla
+        } else {
+            alert("Error deleting world");
+        }
+    } catch (error) {
+        console.error("Delete error:", error);
+    }
 }
 
 async function saveWorldConfig() {

@@ -75,4 +75,21 @@ public class WorldConfigController {
                     .body("Error changing active world: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteWorld(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String name) {
+
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        try {
+            worldService.deleteWorld(name);
+            return ResponseEntity.ok(Map.of("message", "World deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

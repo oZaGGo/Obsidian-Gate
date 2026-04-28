@@ -64,6 +64,18 @@ public class WorldConfigService {
         }
     }
 
+    @Transactional
+    public void deleteWorld(String worldName) {
+        World world = worldRepository.findByName(worldName)
+                .orElseThrow(() -> new RuntimeException("World not found"));
+
+        if (world.isCurrent()) {
+            throw new RuntimeException("Cannot delete the active world");
+        }
+
+        worldRepository.delete(world);
+    }
+
     private WorldDTO convertToDTO(World world) {
         WorldDTO dto = new WorldDTO();
         dto.setNombre(world.getName());
