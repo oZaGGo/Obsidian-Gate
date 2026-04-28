@@ -1,0 +1,10 @@
+{
+  "name": "obsidian-gate-obfuscator",
+  "version": "1.0.0",
+  "scripts": {
+    "obfuscate": "javascript-obfuscator src/main/resources/static/js --output target/classes/static/js --compact true --self-defending true --string-array true --string-array-encoding 'base64' --string-array-threshold 1"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.0"
+  }
+}
