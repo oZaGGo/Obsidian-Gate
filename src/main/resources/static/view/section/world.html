@@ -1,6 +1,6 @@
 <div class="fade-in settings-container">
     <div class="header-section">
-        <h1>World Management</h1>
+        <h1>World management</h1>
     </div>
 
     <div class="settings-grid">
@@ -20,19 +20,19 @@
                     <div class="form-group">
                         <label>Difficulty</label>
                         <select id="world-difficulty">
-                            <option value="peaceful">Peaceful</option>
-                            <option value="easy">Easy</option>
-                            <option value="normal">Normal</option>
-                            <option value="hard">Hard</option>
+                            <option value="PEACEFUL">Peaceful</option>
+                            <option value="EASY">Easy</option>
+                            <option value="NORMAL">Normal</option>
+                            <option value="HARD">Hard</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Gamemode</label>
                         <select id="world-gamemode">
-                            <option value="survival">Survival</option>
-                            <option value="creative">Creative</option>
-                            <option value="adventure">Adventure</option>
-                            <option value="spectator">Spectator</option>
+                            <option value="SURVIVAL">Survival</option>
+                            <option value="CREATIVE">Creative</option>
+                            <option value="ADVENTURE">Adventure</option>
+                            <option value="SPECTATOR">Spectator</option>
                         </select>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                     <th>Name</th>
                     <th>Gamemode</th>
                     <th>Difficulty</th>
-                    <th>Status</th>
+                    <th>Hardcore</th> <th>Status</th>
                     <th>Action</th>
                 </tr>
                 </thead>
@@ -68,15 +68,9 @@
                     <td>world_survival</td>
                     <td><span class="badge badge-gm">Survival</span></td>
                     <td><span class="badge badge-diff">Hard</span></td>
+                    <td><span class="status-inactive">Disabled</span></td>
                     <td><span class="status-active">Active</span></td>
                     <td><button class="btn-select-disabled" disabled>Default</button></td>
-                </tr>
-                <tr>
-                    <td>creative_flat</td>
-                    <td><span class="badge badge-gm">Creative</span></td>
-                    <td><span class="badge badge-diff">Peaceful</span></td>
-                    <td><span class="status-inactive">Inactive</span></td>
-                    <td><button class="btn-select" onclick="setWorldDefault('creative_flat')">Set Default</button></td>
                 </tr>
                 </tbody>
             </table>

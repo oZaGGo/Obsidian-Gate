@@ -12,4 +12,6 @@ public interface WorldRepository extends JpaRepository<World, Long> {
 
     @Query("SELECT w FROM World w WHERE w.current = true")
     Optional<World> findCurrentWorld();
+
+    Optional<World> findByName(String name);
 }

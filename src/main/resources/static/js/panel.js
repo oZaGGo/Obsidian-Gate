@@ -37,6 +37,9 @@ const router = {
         if (viewName === 'server') {
             loadSettings();
         }
+        if (viewName === 'world') {
+            loadWorldView()
+        }
     }
 };
 
@@ -359,5 +362,138 @@ async function saveSettings() {
         }
     } catch (e) {
         alert("Error saving settings");
+    }
+}
+
+
+// World
+
+async function loadWorldView() {
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const currentRes = await fetch('/api/world/current', {
+            headers: { 'Authorization': token }
+        });
+
+        const currentWorld = await currentRes.json().catch(() => null);
+
+        if (currentWorld) {
+            document.getElementById('world-name').value = currentWorld.nombre;
+            document.getElementById('world-seed').value = currentWorld.seed || '';
+            document.getElementById('world-difficulty').value = currentWorld.difficulty;
+            document.getElementById('world-gamemode').value = currentWorld.gamemode;
+            document.getElementById('world-hardcore').checked = currentWorld.hardcore;
+        } else {
+            const nameInput = document.getElementById('world-name');
+            const seedInput = document.getElementById('world-seed');
+
+            nameInput.value = '';
+            nameInput.placeholder = 'Type a name for your world...';
+
+            seedInput.value = '';
+            seedInput.placeholder = 'Leave empty for random seed';
+
+            document.getElementById('world-difficulty').value = 'NORMAL';
+            document.getElementById('world-gamemode').value = 'SURVIVAL';
+            document.getElementById('world-hardcore').checked = false;
+        }
+
+        const allRes = await fetch('/api/world/all', {
+            headers: { 'Authorization': token }
+        });
+        const allWorlds = await allRes.json();
+        renderWorldTable(allWorlds);
+
+    } catch (error) {
+        console.error("Error loading worlds:", error);
+    }
+}
+
+function renderWorldTable(worlds) {
+    const tbody = document.getElementById('world-list-body');
+    tbody.innerHTML = '';
+
+    worlds.forEach(w => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${w.nombre}</td>
+            <td><span class="badge badge-gm">${w.gamemode}</span></td>
+            <td><span class="badge badge-diff">${w.difficulty}</span></td>
+            <td>${w.hardcore}</td> <td>
+                <span class="${w.current ? 'status-active' : 'status-inactive'}">
+                    ${w.current ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td>
+                ${w.current
+            ? '<button class="btn-select-disabled" disabled>Default</button>'
+            : `<button class="btn-select" onclick="setWorldDefault('${w.nombre}')">Set Default</button>`}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+async function saveWorldConfig() {
+    const nameInput = document.getElementById('world-name');
+    const seedInput = document.getElementById('world-seed');
+    const difficultyInput = document.getElementById('world-difficulty');
+    const gamemodeInput = document.getElementById('world-gamemode');
+    const hardcoreInput = document.getElementById('world-hardcore');
+
+    if (!nameInput.value.trim()) {
+        alert("Please enter a world name.");
+        nameInput.focus();
+        return;
+    }
+
+
+    const worldData = {
+        nombre: nameInput.value.trim().replace(/\s+/g, '_'),
+        seed: seedInput.value.trim(),
+        difficulty: difficultyInput.value,
+        gamemode: gamemodeInput.value,
+        hardcore: hardcoreInput.checked,
+        current: true
+    };
+
+    try {
+        const token = localStorage.getItem('mc_token');
+
+        const response = await fetch('/api/world/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify(worldData)
+        });
+
+        if (response.ok) {
+            loadWorldView();
+        } else {
+            const errorData = await response.text();
+            alert("Error saving world: " + errorData);
+        }
+    } catch (error) {
+        alert("Server error");
+    }
+}
+
+async function setWorldDefault(worldName) {
+    try {
+        const response = await fetch(`/api/world/set-active?name=${worldName}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': localStorage.getItem('mc_token')
+            }
+        });
+
+        if (response.ok) {
+            loadWorldView();
+        }
+    } catch (error) {
+        console.error("Error setting default world:", error);
     }
 }
