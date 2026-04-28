@@ -474,6 +474,17 @@ async function saveWorldConfig() {
         return;
     }
 
+    if (!difficultyInput.value.trim()) {
+        alert("Please enter a difficulty.");
+        difficultyInput.focus();
+        return;
+    }
+
+    if (!gamemodeInput.value.trim()) {
+        alert("Please enter a gamemode.");
+        gamemodeInput.focus();
+        return;
+    }
 
     const worldData = {
         nombre: nameInput.value.trim().replace(/\s+/g, '_'),
