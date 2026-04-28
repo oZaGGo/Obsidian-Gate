@@ -1,12 +1,9 @@
 package com.obsidiangate.mcpanel.controller;
 
-import com.obsidiangate.mcpanel.config.ServerConfig;
 import com.obsidiangate.mcpanel.dto.ServerConfigDTO;
-import com.obsidiangate.mcpanel.model.ServerConfigModel;
-import com.obsidiangate.mcpanel.repository.ServerConfigRepository;
 import com.obsidiangate.mcpanel.service.AuthService;
+import com.obsidiangate.mcpanel.service.ServerConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -24,25 +19,18 @@ import java.util.Map;
 public class ServerConfigController {
 
     @Autowired
-    private ServerConfigRepository repository;
-
-    @Autowired
-    private ServerConfig serverConfig;
+    private ServerConfigService configService;
 
     @Autowired
     private AuthService authService;
-
-    private final String ICON_PATH = System.getProperty("user.dir") + "/mc_server/server-icon.png";
-
 
     @GetMapping("/get")
     public ResponseEntity<?> getConfig(@RequestHeader("Authorization") String token) {
         if (!authService.authenticate(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        return ResponseEntity.ok(repository.findActiveConfig());
+        return ResponseEntity.ok(configService.getConfig());
     }
-
 
     @PostMapping("/save")
     public ResponseEntity<?> saveConfig(
@@ -53,38 +41,22 @@ public class ServerConfigController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
-        ServerConfigModel current = repository.findActiveConfig();
-        if (current != null) {
-            current.setName(dto.getName());
-            current.setDescription(dto.getDescription());
-            current.setMaxGbRam(dto.getMaxGbRam());
-            current.setRenderDistance(dto.getRenderDistance());
-            current.setSimulationDistance(dto.getSimulationDistance());
-            current.setMaxPlayers(dto.getMaxPlayers());
-            current.setRconPort(dto.getRconPort());
-        }
-
-        repository.save(current);
-        serverConfig.refresh();
-
+        configService.updateConfig(dto);
         return ResponseEntity.ok(Map.of("message", "Configuration successfully updated"));
     }
 
-
     @GetMapping("/icon")
     public ResponseEntity<Resource> getIcon() {
-        File file = new File(ICON_PATH);
-        if (!file.exists()) {
+        Resource resource = configService.getIconResource();
+        if (resource == null) {
             return ResponseEntity.notFound().build();
         }
 
-        Resource resource = new FileSystemResource(file);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"server-icon.png\"")
                 .body(resource);
     }
-
 
     @PostMapping("/icon/upload")
     public ResponseEntity<?> uploadIcon(
@@ -96,13 +68,11 @@ public class ServerConfigController {
         }
 
         try {
-            File dest = new File(ICON_PATH);
-            if (!dest.getParentFile().exists()) dest.getParentFile().mkdirs();
-
-            file.transferTo(dest);
+            configService.saveIcon(file);
             return ResponseEntity.ok(Map.of("message", "Icon uploaded successfully"));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading icon: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error uploading icon: " + e.getMessage());
         }
     }
 }

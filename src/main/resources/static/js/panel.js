@@ -353,7 +353,8 @@ async function saveSettings() {
         });
 
         if (response.ok) {
-            alert("Settings saved! Restart the server to apply hardware changes.");
+            loadSettings()
+            alert("Settings saved! Restart the server to apply changes.");
         }
     } catch (e) {
         alert("Error saving settings");
