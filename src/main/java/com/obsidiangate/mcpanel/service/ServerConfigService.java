@@ -10,6 +10,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -59,10 +61,32 @@ public class ServerConfigService {
     }
 
     public void saveIcon(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IOException("The file is empty.");
+        }
+
+        BufferedImage image = ImageIO.read(file.getInputStream());
+
+        if (image == null) {
+            throw new IOException("Invalid image format.");
+        }
+
+        if (image.getWidth() != 64 || image.getHeight() != 64) {
+            throw new IOException("Icon must be exactly 64x64 pixels. Current: "
+                    + image.getWidth() + "x" + image.getHeight());
+        }
+
         File dest = new File(ICON_PATH);
         if (!dest.getParentFile().exists()) {
             dest.getParentFile().mkdirs();
         }
-        file.transferTo(dest);
+
+        boolean result = ImageIO.write(image, "png", dest);
+
+        if (!result) {
+            throw new IOException("Could not save the PNG file. Check folder permissions.");
+        }
+
+        System.out.println("Server icon updated and rewritten successfully at: " + ICON_PATH);
     }
 }
