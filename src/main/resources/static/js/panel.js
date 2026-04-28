@@ -274,6 +274,28 @@ function setControlButtonsDisabled(disabled) {
 
 // SERVER CONFIG
 
+function copyToClipboard(text, element) {
+    navigator.clipboard.writeText(text).then(() => {
+
+        const label = element.querySelector('#copy-label');
+        const originalText = label.innerText;
+        const originalColor = element.style.borderColor;
+
+        label.innerText = "Copied!";
+        label.style.color = "#ffffff";
+        element.style.borderColor = "#ffffff";
+
+        setTimeout(() => {
+            label.innerText = originalText;
+            label.style.color = "#00ffff";
+            element.style.borderColor = "rgba(0, 255, 255, 0.4)";
+        }, 1500);
+
+    }).catch(err => {
+        console.error('Copy error: ', err);
+    });
+}
+
 async function loadSettings() {
     const token = localStorage.getItem('mc_token');
     try {
