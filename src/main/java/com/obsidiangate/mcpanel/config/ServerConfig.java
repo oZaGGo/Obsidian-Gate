@@ -20,6 +20,8 @@ public class ServerConfig {
     private String description;
     private int renderDistance;
     private int simulationDistance;
+    private int maxPlayers = 20;
+    private int rconPort = 25575;
 
     @PostConstruct
     public void init() {
@@ -36,6 +38,8 @@ public class ServerConfig {
             this.description = model.getDescription();
             this.renderDistance = model.getRenderDistance();
             this.simulationDistance = model.getSimulationDistance();
+            this.maxPlayers = model.getMaxPlayers();
+            this.rconPort = model.getRconPort();
         } else {
             this.maxGbRam = 2;
             this.name = "Nuevo Servidor";

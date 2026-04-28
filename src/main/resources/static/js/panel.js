@@ -19,6 +19,7 @@ const router = {
                 </div>`;
         }
 
+        this.initViewLogic(viewName);
         this.updateActiveMenu(viewName);
     },
 
@@ -30,6 +31,12 @@ const router = {
                 btn.classList.add('active');
             }
         });
+    },
+
+    initViewLogic(viewName) {
+        if (viewName === 'server') {
+            loadSettings();
+        }
     }
 };
 
@@ -241,4 +248,114 @@ function setControlButtonsDisabled(disabled) {
         btn.style.opacity = disabled ? "0.5" : "1";
         btn.style.cursor = disabled ? "not-allowed" : "pointer";
     });
+}
+
+
+// SERVER CONFIG
+
+async function loadSettings() {
+    const token = localStorage.getItem('mc_token');
+    try {
+        const response = await fetch('/api/config/get', {
+            headers: { 'Authorization': token }
+        });
+        const data = await response.json();
+
+        document.getElementById('set-name').value = data.name;
+        document.getElementById('set-description').value = data.description;
+        document.getElementById('set-ram').value = data.maxGbRam;
+        document.getElementById('set-render').value = data.renderDistance;
+        document.getElementById('set-sim').value = data.simulationDistance;
+        document.getElementById('set-players').value = data.maxPlayers;
+        document.getElementById('set-rcon').value = data.rconPort;
+
+        document.querySelectorAll('output').forEach(out => {
+            const input = out.previousElementSibling;
+            if(input.type === 'range') out.value = input.value;
+        });
+    } catch (e) {
+        console.error("Error loading settings");
+    }
+}
+
+function handleIconSelection(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('settings-icon-preview').src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    uploadIcon(file);
+}
+
+async function uploadIcon() {
+    const fileInput = document.getElementById('icon-input');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("File missing.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const response = await fetch('/api/config/icon/upload', {
+            method: 'POST',
+            headers: { 'Authorization': token },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("Icon succsessfully added");
+            const timestamp = new Date().getTime();
+            const newUrl = `/api/config/icon?t=${timestamp}`;
+
+            if(document.getElementById('settings-icon-preview'))
+                document.getElementById('settings-icon-preview').src = newUrl;
+            if(document.getElementById('dashboard-icon'))
+                document.getElementById('dashboard-icon').src = newUrl;
+
+        } else {
+            alert("Error uploading icon");
+        }
+    } catch (e) {
+        console.error("Error updating", e);
+    }
+}
+
+async function saveSettings() {
+    const token = localStorage.getItem('mc_token');
+    const settings = {
+        name: document.getElementById('set-name').value,
+        description: document.getElementById('set-description').value,
+        maxGbRam: parseInt(document.getElementById('set-ram').value),
+        renderDistance: parseInt(document.getElementById('set-render').value),
+        simulationDistance: parseInt(document.getElementById('set-sim').value),
+        maxPlayers: parseInt(document.getElementById('set-players').value),
+        rconPort: parseInt(document.getElementById('set-rcon').value)
+    };
+
+    try {
+        const response = await fetch('/api/config/save', {
+            method: 'POST',
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(settings)
+        });
+
+        if (response.ok) {
+            alert("Settings saved! Restart the server to apply hardware changes.");
+        }
+    } catch (e) {
+        alert("Error saving settings");
+    }
 }

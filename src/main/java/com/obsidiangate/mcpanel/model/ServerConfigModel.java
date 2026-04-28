@@ -34,5 +34,11 @@ public class ServerConfigModel {
     private int simulationDistance = 10;
 
     @Column(nullable = false)
+    private int maxPlayers = 20;
+
+    @Column(nullable = false)
+    private int rconPort = 25575;
+
+    @Column(nullable = false)
     private boolean firstSetup = true;
 }

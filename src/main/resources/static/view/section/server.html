@@ -1,0 +1,62 @@
+<div class="fade-in settings-container">
+    <div class="header-section">
+        <h1>Server Settings</h1>
+    </div>
+
+    <div class="settings-grid">
+        <div class="settings-card">
+            <h3>Server Icon</h3>
+            <div class="icon-upload-wrapper">
+                <img src="/api/config/icon" id="settings-icon-preview" class="icon-preview-big">
+                <input type="file" id="icon-input" accept="image/png" onchange="handleIconSelection(event)">
+                <label for="icon-input" class="btn-secondary">Upload PNG (64x64)</label>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3>General Information</h3>
+            <div class="form-group">
+                <label>Server Name</label>
+                <input type="text" id="set-name" placeholder="My Minecraft Server">
+            </div>
+            <div class="form-group">
+                <label>Description (MOTD)</label>
+                <textarea id="set-description" rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3>Hardware & Performance</h3>
+            <div class="form-group">
+                <label>Max RAM (GB)</label>
+                <input type="number" id="set-ram" min="1" max="64">
+            </div>
+            <div class="form-group">
+                <label>Render Distance (Chunks)</label>
+                <input type="range" id="set-render" min="2" max="32" oninput="this.nextElementSibling.value = this.value">
+                <output>16</output>
+            </div>
+            <div class="form-group">
+                <label>Simulation Distance (Chunks)</label>
+                <input type="range" id="set-sim" min="2" max="32" oninput="this.nextElementSibling.value = this.value">
+                <output>16</output>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3>MultiPlayer & Network</h3>
+            <div class="form-group">
+                <label>Max Players</label>
+                <input type="number" id="set-players" min="1" max="999">
+            </div>
+            <div class="form-group">
+                <label>RCON Port</label>
+                <input type="number" id="set-rcon" placeholder="25575">
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-footer">
+        <button class="btn btn-save-small" onclick="saveSettings()">Save Changes</button>
+    </div>
+</div>
