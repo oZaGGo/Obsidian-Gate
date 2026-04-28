@@ -16,6 +16,12 @@ public class WorldConfigService {
     @Autowired
     private WorldRepository worldRepository;
 
+    @Autowired
+    private WorldManagementService worldManagementService;
+
+    @Autowired
+    private PropertiesService propertiesService;
+
     public List<WorldDTO> getAllWorlds() {
         return worldRepository.findAll().stream()
                 .map(this::convertToDTO)
@@ -43,6 +49,9 @@ public class WorldConfigService {
         worldRepository.save(world);
 
         setActiveWorld(dto.getNombre());
+
+        propertiesService.updateProperties();
+        propertiesService.saveToFile();
     }
 
     @Transactional
@@ -61,6 +70,8 @@ public class WorldConfigService {
 
         if (target != null) {
             worldRepository.saveAll(worlds);
+            propertiesService.updateProperties();
+            propertiesService.saveToFile();
         }
     }
 
@@ -74,6 +85,7 @@ public class WorldConfigService {
         }
 
         worldRepository.delete(world);
+        worldManagementService.deleteWorldFolder(worldName);
     }
 
     private WorldDTO convertToDTO(World world) {

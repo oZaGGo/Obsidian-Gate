@@ -22,6 +22,9 @@ public class ServerConfigService {
     @Autowired
     private ServerConfig serverConfigInApp;
 
+    @Autowired
+    private PropertiesService propertiesService;
+
     private final String ICON_PATH = System.getProperty("user.dir") + "/mc_server/server-icon.png";
 
     public ServerConfigModel getConfig() {
@@ -45,6 +48,8 @@ public class ServerConfigService {
 
         repository.save(current);
         serverConfigInApp.refresh();
+        propertiesService.updateProperties();
+        propertiesService.saveToFile();
     }
 
     public Resource getIconResource() {

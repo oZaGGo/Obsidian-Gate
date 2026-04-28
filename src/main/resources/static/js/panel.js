@@ -34,6 +34,10 @@ const router = {
     },
 
     initViewLogic(viewName) {
+        if (viewName === 'home') {
+            refreshLogs();
+            moveScroll();
+        }
         if (viewName === 'server') {
             loadSettings();
         }
@@ -52,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     router.load('home');
 
     if (online){
-        refreshMetrics()
+        refreshMetrics();
     }
     checkServerStatus();
     refreshLogs();
@@ -181,6 +185,14 @@ async function refreshLogs() {
     } catch (e) {
         console.error("Loggin error");
     }
+}
+
+function moveScroll(){
+    const consoleOutput = document.getElementById('console-output');
+    consoleOutput.scrollTo({
+        top: consoleOutput.scrollHeight,
+        behavior: 'smooth'
+    });
 }
 
 async function sendCommand() {

@@ -21,7 +21,7 @@ public class ServerConfig {
     private int renderDistance;
     private int simulationDistance;
     private int maxPlayers = 20;
-    private int rconPort = 25575;
+    private int serverPort = 25565;
 
     @PostConstruct
     public void init() {
@@ -39,7 +39,7 @@ public class ServerConfig {
             this.renderDistance = model.getRenderDistance();
             this.simulationDistance = model.getSimulationDistance();
             this.maxPlayers = model.getMaxPlayers();
-            this.rconPort = model.getRconPort();
+            this.serverPort = model.getRconPort();
         } else {
             // If bd is empty
             this.firstSetup = true;
@@ -49,7 +49,7 @@ public class ServerConfig {
             this.renderDistance = 16;
             this.simulationDistance = 10;
             this.maxPlayers = 20;
-            this.rconPort = 25575;
+            this.serverPort = 25565;
         }
     }
 }
