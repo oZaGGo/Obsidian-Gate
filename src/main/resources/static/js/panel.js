@@ -453,30 +453,58 @@ function renderWorldTable(worlds) {
     const tbody = document.getElementById('world-list-body');
     tbody.innerHTML = '';
 
+    // XSS protection
+    const escapeHTML = (str) => {
+        if (!str) return "";
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
     worlds.forEach(w => {
         const row = document.createElement('tr');
+
         row.innerHTML = `
-            <td>${w.nombre}</td>
-            <td><span class="badge badge-gm">${w.gamemode}</span></td>
-            <td><span class="badge badge-diff">${w.difficulty}</span></td>
-            <td>${w.hardcore}</td>
+            <td>${escapeHTML(w.nombre)}</td>
+            <td><span class="badge badge-gm">${escapeHTML(w.gamemode)}</span></td>
+            <td><span class="badge badge-diff">${escapeHTML(w.difficulty)}</span></td>
+            <td>${escapeHTML(w.hardcore)}</td>
             <td>
                 <span class="${w.current ? 'status-active' : 'status-inactive'}">
                     ${w.current ? 'Active' : 'Inactive'}
                 </span>
             </td>
-            <td>
-                <div style="display: flex; gap: 8px;">
-                    ${w.current
-            ? '<button class="btn-select-disabled" disabled>Default</button>'
-            : `<button class="btn-select" onclick="setWorldDefault('${w.nombre}')">Set Default</button>`}
-                    
-                    ${!w.current
-            ? `<button class="btn-delete" onclick="deleteWorld('${w.nombre}')">Delete</button>`
-            : ''}
-                </div>
+            <td class="actions-cell">
+                <div style="display: flex; gap: 8px;" class="btn-container">
+                    </div>
             </td>
         `;
+
+        const btnContainer = row.querySelector('.btn-container');
+
+        if (w.current) {
+            const btnDefault = document.createElement('button');
+            btnDefault.className = 'btn-select-disabled';
+            btnDefault.disabled = true;
+            btnDefault.textContent = 'Default';
+            btnContainer.appendChild(btnDefault);
+        } else {
+            const btnSet = document.createElement('button');
+            btnSet.className = 'btn-select';
+            btnSet.textContent = 'Set Default';
+            btnSet.onclick = () => setWorldDefault(w.nombre);
+            btnContainer.appendChild(btnSet);
+
+            const btnDel = document.createElement('button');
+            btnDel.className = 'btn-delete';
+            btnDel.textContent = 'Delete';
+            btnDel.onclick = () => deleteWorld(w.nombre);
+            btnContainer.appendChild(btnDel);
+        }
+
         tbody.appendChild(row);
     });
 }
@@ -580,6 +608,17 @@ async function loadUsers() {
     const userListBody = document.getElementById('user-list-body');
     if (!userListBody) return;
 
+    // XSS Protection
+    const escapeHTML = (str) => {
+        if (!str) return "";
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
     try {
         const response = await fetch('/api/auth/users', {
             headers: { 'Authorization': localStorage.getItem('mc_token') }
@@ -589,30 +628,48 @@ async function loadUsers() {
 
         const users = await response.json();
 
-        userListBody.innerHTML = users.map(user => {
-            const roleBadge = user.admin
-                ? `<span class="badge" style="background: #da6459; color: white;">ADMIN</span>`
-                : `<span class="badge" style="background: #7ebbee; color: white;">MANAGER</span>`;
+        userListBody.innerHTML = '';
 
+        users.forEach(user => {
+            const row = document.createElement('tr');
+
+            const safeUsername = escapeHTML(user.username);
             const lastConn = user.lastConn
                 ? new Date(user.lastConn).toLocaleString()
                 : '<span style="color: #666">Never</span>';
 
-            const actionButton = user.admin
-                ? `<button class="btn-select-disabled" disabled>Protected</button>`
-                : `<button class="btn-delete" onclick="deleteUser('${user.username}')">
-                     <i class="fas fa-trash"></i> Remove
-                   </button>`;
+            const roleBadge = user.admin
+                ? `<span class="badge" style="background: #da6459; color: white;">ADMIN</span>`
+                : `<span class="badge" style="background: #7ebbee; color: white;">MANAGER</span>`;
 
-            return `
-                <tr>
-                    <td>${user.admin ? `<strong>${user.username}</strong>` : user.username}</td>
-                    <td>${roleBadge}</td>
-                    <td>${lastConn}</td>
-                    <td style="text-align: right;">${actionButton}</td>
-                </tr>
+            row.innerHTML = `
+                <td>${user.admin ? `<strong>${safeUsername}</strong>` : safeUsername}</td>
+                <td>${roleBadge}</td>
+                <td>${lastConn}</td>
+                <td style="text-align: right;" class="actions-cell"></td>
             `;
-        }).join('');
+
+            const actionsCell = row.querySelector('.actions-cell');
+
+            if (user.admin) {
+                const btnProtected = document.createElement('button');
+                btnProtected.className = 'btn-select-disabled';
+                btnProtected.disabled = true;
+                btnProtected.textContent = 'Protected';
+                actionsCell.appendChild(btnProtected);
+            } else {
+                const btnDelete = document.createElement('button');
+                btnDelete.className = 'btn-delete';
+
+                btnDelete.innerHTML = '<i class="fas fa-trash"></i> Remove';
+
+                btnDelete.onclick = () => deleteUser(user.username);
+
+                actionsCell.appendChild(btnDelete);
+            }
+
+            userListBody.appendChild(row);
+        });
 
     } catch (e) {
         console.error("Error loading users:", e);

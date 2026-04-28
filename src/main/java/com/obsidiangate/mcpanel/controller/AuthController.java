@@ -5,6 +5,7 @@ import com.obsidiangate.mcpanel.service.AuthService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,11 +24,15 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    private final Bucket bucket;
+    private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
-    public AuthController() {
-        Bandwidth limit = Bandwidth.classic(5, Refill.intervally(1, Duration.ofMinutes(3)));
-        this.bucket = Bucket.builder().addLimit(limit).build();
+    private Bucket createNewBucket() {
+        Bandwidth limit = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(3)));
+        return Bucket.builder().addLimit(limit).build();
+    }
+
+    private Bucket getBucket(String ip) {
+        return cache.computeIfAbsent(ip, k -> createNewBucket());
     }
 
     @PostMapping("/register")
@@ -47,7 +53,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> login(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+        String ip = getClientIP(request);
+        Bucket bucket = getBucket(ip);
 
         if (bucket.tryConsume(1)) {
             String token = authService.login(userDTO);
@@ -58,7 +66,7 @@ public class AuthController {
                     .body(Map.of("message", "Invalid credentials"));
         } else {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .body(Map.of("message", "Too many attempts. Try again in a few minutes."));
+                    .body(Map.of("message", "Too many attempts from your IP. Try again in 3 minutes."));
         }
     }
 
@@ -105,6 +113,14 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
+    }
+
+    private String getClientIP(HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0];
     }
 
 }
