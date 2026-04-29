@@ -562,3 +562,36 @@ input[type="text"]:focus {
     font-size: 0.75rem;
     font-weight: bold;
 }
+
+
+/* --- LOG --- */
+
+.btn-filter {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.btn-filter.active {
+    background: rgba(95, 199, 143, 0.2);
+    border-color: #5fc78f;
+    color: #5fc78f;
+}
+
+.badge-log-authorization { color: #5fb2c7; border: 1px solid #5fb2c7; }
+.badge-log-serverconfig { color: #a36bdb; border: 1px solid #a36bdb; }
+.badge-log-worldconfig { color: #dbb26b; border: 1px solid #dbb26b; }
+.badge-log-worldmanagement { color: #f26d6d; border: 1px solid #f26d6d; }
+.badge-log-serverruntime { color: #5fc78f; border: 1px solid #5fc78f; }
+
+[class^="badge-log-"] {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: inline-block;
+}

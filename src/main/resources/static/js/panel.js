@@ -70,14 +70,52 @@ const router = {
         if (viewName === 'security') {
             loadUsers()
         }
+
+        if (viewName === 'log') {
+
+            //First load
+
+            const initialBtn = document.querySelector('.btn-filter.active');
+            if(initialBtn) filterLogs(null, initialBtn);
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const initialBtn = document.querySelector('.btn-filter.active');
+                if(initialBtn) filterLogs(null, initialBtn);
+            });
+        }
     }
 };
+
+async function checkAdminPermissions() {
+    const token = localStorage.getItem('mc_token');
+    const logButton = document.getElementById('nav-log');
+
+    try {
+        const response = await fetch('/api/auth/admin', {
+            headers: { 'Authorization': token }
+        });
+
+        const data = await response.json();
+
+        if (!data.admin) {
+            logButton.disabled = true;
+            logButton.style.opacity = '0.5';
+            logButton.style.cursor = 'not-allowed';
+            logButton.onclick = null;
+        }
+    } catch (error) {
+        console.error("Error verificando permisos de admin:", error);
+        logButton.style.display = 'none';
+    }
+}
 
 let online = false;
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkSession();
+
+    checkAdminPermissions();
 
     document.getElementById('txt-username').innerText = localStorage.getItem('mc_user') || 'User';
 
@@ -93,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (document.getElementById('cpu-usage')) {
             checkSession();
+            checkAdminPermissions();
             if (online){
                 refreshMetrics()
             }
@@ -793,4 +832,63 @@ async function deleteUser(username) {
         console.error("Error:", e);
         alert("Connection error");
     }
+}
+
+// LOG
+
+async function filterLogs(type, buttonElement) {
+    document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+    buttonElement.classList.add('active');
+
+    const token = localStorage.getItem('mc_token');
+    const url = type ? `/api/logs/recent?type=${type}` : '/api/logs/recent';
+
+    try {
+        const response = await fetch(url, {
+            headers: { 'Authorization': token }
+        });
+
+        if (!response.ok) throw new Error("Unauthorized or server error");
+
+        const logs = await response.json();
+        renderLogTable(logs);
+    } catch (error) {
+        console.error("Error fetching logs:", error);
+    }
+}
+
+function renderLogTable(logs) {
+    const tbody = document.getElementById('log-list-body');
+    tbody.innerHTML = '';
+
+    logs.forEach(log => {
+        const row = document.createElement('tr');
+
+        const date = new Date(log.timestamp).toLocaleString();
+
+        row.innerHTML = `
+            <td class="log-date" style="color: rgba(255,255,255,0.6); font-size: 0.85rem;"></td>
+            <td class="log-type"></td>
+            <td class="log-author" style="font-weight: bold; color: #dbb26b;"></td>
+            <td class="log-trace">
+                <div class="trace-container" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;"></div>
+            </td>
+        `;
+
+        // XSS protection
+        row.querySelector('.log-date').textContent = date;
+
+        const typeSpan = document.createElement('span');
+        typeSpan.className = `badge badge-log-${log.type.toLowerCase()}`;
+        typeSpan.textContent = log.type;
+        row.querySelector('.log-type').appendChild(typeSpan);
+
+        row.querySelector('.log-author').textContent = log.authorName;
+
+        const traceDiv = row.querySelector('.trace-container');
+        traceDiv.textContent = log.trace;
+        traceDiv.setAttribute('title', log.trace);
+
+        tbody.appendChild(row);
+    });
 }

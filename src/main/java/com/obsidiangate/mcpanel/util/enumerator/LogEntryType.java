@@ -5,5 +5,5 @@ public enum LogEntryType {
     SERVERCONFIG,       // Server config changes
     WORLDCONFIG,        // World config changes
     WORLDMANAGEMENT,     // World management
-    SERVERRUNTIME
+    SERVERRUNTIME // Server actions (start, stop, restart)
 }

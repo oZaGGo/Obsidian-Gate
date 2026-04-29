@@ -105,7 +105,7 @@ public class AuthService {
             return false;
         }
 
-        if (isAdmin(token)) {
+        if (!isAdmin(token)) {
             throw new RuntimeException("Not authorized to create this user");
         }
 
@@ -127,7 +127,7 @@ public class AuthService {
         UserAuth user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (isAdmin(token)) {
+        if (!isAdmin(token)) {
             throw new RuntimeException("Not authorized to delete this user");
         }
 

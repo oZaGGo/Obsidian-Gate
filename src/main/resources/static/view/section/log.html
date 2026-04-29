@@ -1,0 +1,38 @@
+<div class="fade-in settings-container">
+    <div class="header-section">
+        <h1>Logs</h1>
+    </div>
+
+    <div class="settings-grid">
+        <div class="settings-card full-width">
+            <h3>Filter Logs</h3>
+            <div class="filter-group" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px;">
+                <button class="btn btn-filter active" onclick="filterLogs(null, this)">All types</button>
+
+                <button class="btn btn-filter" onclick="filterLogs('AUTHORIZATION', this)">Authorization</button>
+                <button class="btn btn-filter" onclick="filterLogs('SERVERCONFIG', this)">Server Config</button>
+                <button class="btn btn-filter" onclick="filterLogs('WORLDCONFIG', this)">World Config</button>
+                <button class="btn btn-filter" onclick="filterLogs('WORLDMANAGEMENT', this)">World Management</button>
+                <button class="btn btn-filter" onclick="filterLogs('SERVERRUNTIME', this)">Server Runtime</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-card mt-20">
+        <h3>Recent Activity (24h)</h3>
+        <div class="world-list-container">
+            <table class="world-table" style="table-layout: fixed; width: 100%;">
+                <thead>
+                <tr>
+                    <th style="width: 180px;">Date</th>
+                    <th style="width: 150px;">Type</th>
+                    <th style="width: 120px;">Author</th>
+                    <th>Trace</th>
+                </tr>
+                </thead>
+                <tbody id="log-list-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

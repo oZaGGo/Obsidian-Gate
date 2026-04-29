@@ -78,6 +78,14 @@ public class LogService {
                 .collect(Collectors.toList());
     }
 
+    public List<LogEntryDTO> getLastLogsbyType(LogEntryType type) {
+        LocalDateTime limit = LocalDateTime.now().minusHours(24);
+        return logRepository.findByTypeAndTimestampAfterOrderByTimestampDesc(type, limit)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     private LogEntryDTO convertToDTO(LogEntry entry) {
         String authorName = (entry.getAuthor() != null)
                 ? entry.getAuthor().getUsername()
