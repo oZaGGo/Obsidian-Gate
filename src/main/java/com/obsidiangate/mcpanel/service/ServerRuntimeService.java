@@ -42,6 +42,10 @@ public class ServerRuntimeService {
                 "java",
                 ramFlag,
                 startRamFlag,
+                // Skip warnings
+                "--enable-native-access=ALL-UNNAMED",
+                "--add-modules=jdk.crypto.ec",
+                "-Dsun.stdout.encoding=UTF-8",
                 "-jar",
                 jarName,
                 "nogui"
@@ -59,8 +63,11 @@ public class ServerRuntimeService {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(serverProcess.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+
+                    String cleanLine = sanitizeLogLine(line);
+
                     synchronized (consoleLogs) {
-                        consoleLogs.add(line);
+                        consoleLogs.add(cleanLine);
                         if (consoleLogs.size() > 100) consoleLogs.remove(0);
                     }
 
@@ -70,6 +77,21 @@ public class ServerRuntimeService {
                 System.err.println("Console closed: " + e.getMessage());
             }
         }).start();
+    }
+
+
+    private String sanitizeLogLine(String line) {
+
+        String projectRoot = System.getProperty("user.dir");
+        if (line.contains(projectRoot)) {
+            return line.replace(projectRoot, "[PROJECT_ROOT]");
+        }
+
+        if (line.contains("zagg294")) {
+            return line.replaceAll("/home/zagg294/[^\\s]*", "[PROTECTED_PATH]");
+        }
+
+        return line;
     }
 
     public void stopServer() {
