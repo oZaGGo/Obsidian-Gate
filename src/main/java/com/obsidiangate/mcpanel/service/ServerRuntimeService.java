@@ -2,6 +2,7 @@ package com.obsidiangate.mcpanel.service;
 
 import com.obsidiangate.mcpanel.config.ServerConfig;
 import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.*;
@@ -94,6 +95,7 @@ public class ServerRuntimeService {
         return line;
     }
 
+    @PreDestroy
     public void stopServer() {
         if (serverProcess != null && serverProcess.isAlive()) {
             try {
