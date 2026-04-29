@@ -53,7 +53,7 @@ async function checkSession() {
         const response = await fetch(`${API_BASE}/validate?token=${token}`);
         if (!response.ok) {
             localStorage.clear();
-            window.location.href = "index.html";
+            window.location.href = "../index.html";
         }
     } catch (error) {
         console.error("Session validation failed. Try to log in again.");

@@ -1,12 +1,15 @@
 package com.obsidiangate.mcpanel.service;
 
 import com.obsidiangate.mcpanel.config.ServerConfig;
+import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ServerRuntimeService {
@@ -14,11 +17,16 @@ public class ServerRuntimeService {
     @Autowired
     private ServerConfig serverConfig;
 
+    @Autowired
+    private LiveCommandService liveCommandService;
+
     private Process serverProcess;
     private final List<String> consoleLogs = new ArrayList<>();
 
     private final String serverPath = Paths.get(System.getProperty("user.dir"), "mc_server").toString();
     private final String jarName = "server.jar";
+
+    private static final Pattern CHAT_PATTERN = Pattern.compile("<(\\w+)> (.*)");
 
     private long startTime = 0;
 
@@ -55,6 +63,8 @@ public class ServerRuntimeService {
                         consoleLogs.add(line);
                         if (consoleLogs.size() > 100) consoleLogs.remove(0);
                     }
+
+                    handleChatCommands(line);
                 }
             } catch (IOException e) {
                 System.err.println("Console closed: " + e.getMessage());
@@ -120,5 +130,40 @@ public class ServerRuntimeService {
         long hours = (diff / (1000 * 60 * 60));
 
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    private void handleChatCommands(String line) {
+        Matcher matcher = CHAT_PATTERN.matcher(line);
+
+        if (matcher.find()) {
+            String playerName = matcher.group(1);
+            String fullMessage = matcher.group(2).trim();
+
+            if (!fullMessage.startsWith(".")) {
+                return;
+            }
+
+            String lowerMessage = fullMessage.toLowerCase();
+
+            for (ChatCommandType command : ChatCommandType.values()) {
+                // Command prefix is "."
+                String cmdWithPrefix = "." + command.getValue();
+
+                if (lowerMessage.startsWith(cmdWithPrefix)) {
+
+                    // Extract args after command
+                    String args = "";
+                    if (fullMessage.length() > cmdWithPrefix.length()) {
+                        args = fullMessage.substring(cmdWithPrefix.length()).trim();
+                    }
+
+                    // "this" is used to maintain the process reference and service access for command execution
+
+                    liveCommandService.execute(command, playerName, args, this);
+
+                    break;
+                }
+            }
+        }
     }
 }
