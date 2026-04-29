@@ -1,0 +1,49 @@
+<div class="fade-in settings-container">
+    <div class="header-section">
+        <h1>Gate Commands</h1>
+        <p style="color: var(--text-dim); margin-top: 5px;">
+            Executable commands directly from the in-game chat. All commands must start with the <code style="color: var(--text); font-weight: bold;">.</code> prefix.
+        </p>
+    </div>
+
+    <div class="settings-grid">
+        <div class="settings-card">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="status-icon success" style="width: 10px; height: 10px;"></span>
+                <h3 style="margin: 0;">.echo</h3>
+            </div>
+            <p style="margin-top: 10px; color: var(--text-dim);">
+                Repeats the provided message back to the server chat, identifying the original sender.
+            </p>
+            <div class="filter-group" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                <code style="font-size: 0.9rem; color: var(--text);">Usage: .echo [message]</code>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="status-icon success" style="width: 10px; height: 10px;"></span>
+                <h3 style="margin: 0;">.info</h3>
+            </div>
+            <p style="margin-top: 10px; color: var(--text-dim);">
+                Toggles the real-time system metrics broadcast (CPU & RAM usage) every 3 seconds.
+            </p>
+            <div class="filter-group" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                <code style="font-size: 0.9rem; color: var(--text);">Usage: .info &lt;start&gt; | &lt;stop&gt;</code>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="status-icon warning" style="width: 10px; height: 10px;"></span>
+                <h3 style="margin: 0;">.ask</h3>
+            </div>
+            <p style="margin-top: 10px; color: var(--text-dim);">
+                Interact with the Integrated AI for general assistance.
+            </p>
+            <div class="filter-group" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                <code style="font-size: 0.9rem; color: var(--text);">Usage: .ask [question]</code>
+            </div>
+        </div>
+    </div>
+</div>
