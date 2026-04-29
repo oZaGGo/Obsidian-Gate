@@ -1,6 +1,6 @@
 package com.obsidiangate.mcpanel.service;
 
-import com.obsidiangate.mcpanel.config.ServerAuthConfig;
+import com.obsidiangate.mcpanel.config.AppConfig;
 import com.obsidiangate.mcpanel.config.ServerConfig;
 import com.obsidiangate.mcpanel.dto.UserDTO;
 import com.obsidiangate.mcpanel.model.ServerConfigModel;
@@ -28,7 +28,7 @@ public class AuthService {
     private UserAuthRepository userRepository;
 
     @Autowired
-    private ServerAuthConfig authConfig;
+    private AppConfig appConfig;
 
     @Autowired
     private ServerConfig serverConfig;
@@ -44,7 +44,7 @@ public class AuthService {
             UserAuth user = userOpt.get();
             // Check if the token is still valid based on last connection time and authTimeMins
             long minutesSinceLastConn = Duration.between(user.getLastConn(), LocalDateTime.now()).toMinutes();
-            if (minutesSinceLastConn <= authConfig.getAuthTimeMins()) {
+            if (minutesSinceLastConn <= appConfig.getAuthTimeMins()) {
                 return true;
             }
         }

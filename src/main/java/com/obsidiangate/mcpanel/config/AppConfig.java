@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 @Data
 @Getter
 @Setter
-public class ServerAuthConfig {
+public class AppConfig {
     private long authTimeMins = 20; // Mins
     private boolean firstSetup = true;
+    private String aiToken = "api-token-here";
 }

@@ -1,6 +1,7 @@
 package com.obsidiangate.mcpanel.service;
 
 import com.obsidiangate.mcpanel.dto.SystemMetricsDTO;
+import com.obsidiangate.mcpanel.util.ai.AIChat;
 import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ public class LiveCommandService {
 
     @Autowired
     private MetricsService metricsService;
+
+    @Autowired
+    private AIChat aiChat;
 
     // Safe threads
     private final Map<String, Boolean> userMetricsBroadcastStatus = new ConcurrentHashMap<>();
@@ -47,7 +51,35 @@ public class LiveCommandService {
                 }
             }
             case ASK -> {
-                // TODO
+                if (args.isEmpty()) {
+                    runtimeService.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .ask <question>\",\"color\":\"red\"}");
+                } else {
+                    runtimeService.sendCommand("say [Live] Ai is thinking... ");
+                    new Thread(() -> {
+                        try {
+                            String aiResponse = aiChat.askAI(args);
+
+                            System.out.println(aiResponse);
+
+                            if (aiResponse == null || aiResponse.isEmpty()) {
+                                aiResponse = "I couldn't think of anything to say...";
+                            }
+
+                            String escapedResponse = aiResponse
+                                    .replace("\"", "'")
+                                    .replace("\n", " ");
+
+                            runtimeService.sendCommand("tellraw @a [" +
+                                    "{\"text\":\"[AI] \",\"color\":\"dark_purple\",\"bold\":true}," +
+                                    "{\"text\":\"" + escapedResponse + "\",\"color\":\"light_purple\"}" +
+                                    "]");
+
+                        } catch (Exception e) {
+                            runtimeService.sendCommand("say [Live] Unexpected error occurred while processing AI response.");
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
             }
         }
     }
