@@ -10,5 +10,6 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class ServerAuthConfig {
-    private long authTimeMins = 3600; // Mins
+    private long authTimeMins = 20; // Mins
+    private boolean firstSetup = true;
 }

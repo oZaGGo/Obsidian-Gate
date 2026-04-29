@@ -34,6 +34,10 @@ public class WorldConfigService {
                 .orElse(null);
     }
 
+    public boolean isWorld(String name){
+        return worldRepository.findByName(name).isPresent();
+    }
+
     @Transactional
     public void saveWorld(WorldDTO dto) {
         World world = worldRepository.findByName(dto.getNombre())

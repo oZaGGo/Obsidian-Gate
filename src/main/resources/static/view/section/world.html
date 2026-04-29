@@ -11,8 +11,8 @@
             </span>
             <div class="world-config-form">
                 <div class="form-group">
-                    <label>World Name <i style="color: #f26d6d">*</i></label>
-                    <input type="text" id="world-name" placeholder="world">
+                    <label>World Name <i style="color: #f26d6d">*</i> <i style="color: #5fc78f">(Active world)</i> <i style="color: #dbb26b">(New world)</i></label>
+                    <input type="text" id="world-name" placeholder="world" style="color: #5fc78f">
                 </div>
                 <div class="form-group">
                     <label>Seed</label>
@@ -69,12 +69,6 @@
                 </thead>
                 <tbody id="world-list-body">
                 <tr>
-                    <td>world_survival</td>
-                    <td><span class="badge badge-gm">Survival</span></td>
-                    <td><span class="badge badge-diff">Hard</span></td>
-                    <td>false</td>
-                    <td><span class="status-active">Active</span></td>
-                    <td><button class="btn-select-disabled" disabled>Default</button></td>
                 </tr>
                 </tbody>
             </table>

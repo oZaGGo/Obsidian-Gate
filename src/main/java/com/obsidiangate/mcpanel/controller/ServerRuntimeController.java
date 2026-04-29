@@ -1,7 +1,9 @@
 package com.obsidiangate.mcpanel.controller;
 
 import com.obsidiangate.mcpanel.service.AuthService;
+import com.obsidiangate.mcpanel.service.LogService;
 import com.obsidiangate.mcpanel.service.ServerRuntimeService;
+import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/server")
 public class ServerRuntimeController {
+
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private ServerRuntimeService serverService;
@@ -43,6 +48,9 @@ public class ServerRuntimeController {
                 default:
                     return ResponseEntity.badRequest().body("Error: Action '" + action + "' not recognized");
             }
+
+            logService.registerEntry(token, "Executed server action: " + action, LogEntryType.SERVERRUNTIME);
+
             return ResponseEntity.ok(Map.of("message", "Action " + action + " executed successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -64,6 +72,9 @@ public class ServerRuntimeController {
         }
 
         serverService.sendCommand(command);
+
+        logService.registerEntry(token, "Sent command to server: " + command, LogEntryType.SERVERRUNTIME);
+
         return ResponseEntity.ok(Map.of("message", "Command sent"));
     }
 

@@ -43,6 +43,29 @@ const router = {
         }
         if (viewName === 'world') {
             loadWorldView()
+
+            let debounceTimer;
+            document.getElementById('world-name').addEventListener('input', function(e) {
+                const name = e.target.value.trim();
+                const inputElement = e.target;
+
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    if (!name) {
+                        inputElement.style.color = '';
+                        return;
+                    }
+
+                    const response = await fetch(`/api/world/${encodeURIComponent(name)}`, {
+                        headers: { 'Authorization': localStorage.getItem('mc_token') }
+                    });
+
+                    const data = await response.json();
+                    inputElement.style.color = data.world ? '#5fc78f' : '#dbb26b';
+                    inputElement.style.fontWeight = data.world ? 'bold' : 'normal';
+                }, 300);
+
+            });
         }
         if (viewName === 'security') {
             loadUsers()
@@ -576,6 +599,7 @@ async function saveWorldConfig() {
 
         if (response.ok) {
             loadWorldView();
+            checkWorldExists()
         } else {
             const errorData = await response.text();
             alert("Error saving world: " + errorData);
@@ -596,9 +620,35 @@ async function setWorldDefault(worldName) {
 
         if (response.ok) {
             loadWorldView();
+            checkWorldExists()
         }
     } catch (error) {
         console.error("Error setting default world:", error);
+    }
+}
+
+async function checkWorldExists() {
+    const input = document.getElementById('world-name');
+    const name = input.value.trim();
+    const token = localStorage.getItem('mc_token');
+
+    if (!name) {
+        input.style.color = '';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/world/${name}`, {
+            headers: { 'Authorization': token }
+        });
+
+        const data = await response.json();
+
+        input.style.color = data.world ? '#5fc78f' : '#dbb26b'
+        input.style.fontWeight = data.world ? 'bold' : 'normal';
+
+    } catch (e) {
+        console.error("Validation error");
     }
 }
 

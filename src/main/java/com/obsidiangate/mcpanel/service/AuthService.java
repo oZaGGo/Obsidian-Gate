@@ -7,6 +7,7 @@ import com.obsidiangate.mcpanel.model.ServerConfigModel;
 import com.obsidiangate.mcpanel.model.UserAuth;
 import com.obsidiangate.mcpanel.repository.ServerConfigRepository;
 import com.obsidiangate.mcpanel.repository.UserAuthRepository;
+import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
+
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private UserAuthRepository userRepository;
@@ -70,6 +74,8 @@ public class AuthService {
         serverConfigRepository.save(config);
         serverConfig.refresh();
 
+        logService.registerEntry(user.getToken(), "Admin user created: " + user.getUsername(), LogEntryType.AUTHORIZATION);
+
         return user.getToken();
     }
 
@@ -83,6 +89,9 @@ public class AuthService {
             user.setLastConn(LocalDateTime.now());
             user.setToken(UUID.randomUUID().toString());
             userRepository.save(user);
+
+            logService.registerEntry(user.getToken(), user.getUsername() + " loged in.", LogEntryType.AUTHORIZATION);
+
             return user.getToken();
         }
 
@@ -96,10 +105,7 @@ public class AuthService {
             return false;
         }
 
-        UserAuth autor = userRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid autor"));
-
-        if (!autor.isAdmin()) {
+        if (isAdmin(token)) {
             throw new RuntimeException("Not authorized to create this user");
         }
 
@@ -111,6 +117,9 @@ public class AuthService {
         user.setLastConn(LocalDateTime.now());
 
         userRepository.save(user);
+
+        logService.registerEntry(token, "Manager " + user.getUsername() + " created.", LogEntryType.AUTHORIZATION);
+
         return true;
     }
 
@@ -118,14 +127,18 @@ public class AuthService {
         UserAuth user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        UserAuth autor = userRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid autor"));
-
-        if (user.isAdmin() || !autor.isAdmin()) {
+        if (isAdmin(token)) {
             throw new RuntimeException("Not authorized to delete this user");
         }
 
+        logService.registerEntry(token, "Manager " + user.getUsername() + " deleted.", LogEntryType.AUTHORIZATION);
+
         userRepository.delete(user);
+    }
+
+    public boolean isAdmin(String token){
+        Optional<UserAuth> author = userRepository.findByToken(token);
+        return author.map(UserAuth::isAdmin).orElse(false);
     }
 
 

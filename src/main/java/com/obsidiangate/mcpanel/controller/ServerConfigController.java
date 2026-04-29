@@ -2,7 +2,9 @@ package com.obsidiangate.mcpanel.controller;
 
 import com.obsidiangate.mcpanel.dto.ServerConfigDTO;
 import com.obsidiangate.mcpanel.service.AuthService;
+import com.obsidiangate.mcpanel.service.LogService;
 import com.obsidiangate.mcpanel.service.ServerConfigService;
+import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +19,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/config")
 public class ServerConfigController {
+
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private ServerConfigService configService;
@@ -42,6 +47,9 @@ public class ServerConfigController {
         }
 
         configService.updateConfig(dto);
+
+        logService.registerEntry(token, "Updated configuration: " + dto.toString(), LogEntryType.SERVERCONFIG);
+
         return ResponseEntity.ok(Map.of("message", "Configuration successfully updated"));
     }
 
@@ -69,6 +77,9 @@ public class ServerConfigController {
 
         try {
             configService.saveIcon(file);
+
+            logService.registerEntry(token, "Uploaded new server icon", LogEntryType.SERVERCONFIG);
+
             return ResponseEntity.ok(Map.of("message", "Icon uploaded successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

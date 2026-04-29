@@ -2,18 +2,22 @@ package com.obsidiangate.mcpanel.controller;
 
 import com.obsidiangate.mcpanel.dto.WorldDTO;
 import com.obsidiangate.mcpanel.service.AuthService;
+import com.obsidiangate.mcpanel.service.LogService;
 import com.obsidiangate.mcpanel.service.WorldConfigService;
+import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/world")
 public class WorldConfigController {
+
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private WorldConfigService worldService;
@@ -40,6 +44,14 @@ public class WorldConfigController {
         return ResponseEntity.ok(worldService.getAllWorlds());
     }
 
+    @GetMapping("/{name}")
+    public ResponseEntity<?> isWorld(@RequestHeader("Authorization") String token, @PathVariable String name) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        return ResponseEntity.ok().body(Map.of("world", worldService.isWorld(name)));
+    }
+
     @PostMapping("/save")
     public ResponseEntity<?> saveWorld(
             @RequestHeader("Authorization") String token,
@@ -51,6 +63,9 @@ public class WorldConfigController {
 
         try {
             worldService.saveWorld(dto);
+
+            logService.registerEntry(token, "Saved world configuration: " + dto.toString(), LogEntryType.WORLDCONFIG);
+
             return ResponseEntity.ok(Map.of("message", "World configuration saved successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -69,6 +84,9 @@ public class WorldConfigController {
 
         try {
             worldService.setActiveWorld(name);
+
+            logService.registerEntry(token, "Changed active world to: " + name, LogEntryType.WORLDMANAGEMENT);
+
             return ResponseEntity.ok(Map.of("message", "Active world changed to: " + name));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -87,6 +105,9 @@ public class WorldConfigController {
 
         try {
             worldService.deleteWorld(name);
+
+            logService.registerEntry(token, "Deleted world: " + name, LogEntryType.WORLDMANAGEMENT);
+
             return ResponseEntity.ok(Map.of("message", "World deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

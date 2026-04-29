@@ -115,6 +115,14 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/admin")
+    public ResponseEntity<Map<String, Boolean>> isAdmin(@RequestHeader("Authorization") String token) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok().body(Map.of("admin", authService.isAdmin(token)));
+    }
+
     private String getClientIP(HttpServletRequest request) {
         String xfHeader = request.getHeader("X-Forwarded-For");
         if (xfHeader == null) {
