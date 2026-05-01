@@ -207,6 +207,21 @@ h1 {
 .prompt { color: var(--accent); margin-right: 10px; font-weight: bold; }
 .console-input input { background: transparent; border: none; color: white; width: 100%; outline: none; }
 
+.home-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) rgba(255, 255, 255, 0.05);
+}
+.home-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.home-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+.home-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
 /* SERVER CONFIG */
 
 .settings-container {

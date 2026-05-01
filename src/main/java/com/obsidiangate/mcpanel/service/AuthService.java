@@ -144,6 +144,7 @@ public class AuthService {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
+                .filter(user -> !"SYSTEM".equals(user.getUsername()))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
