@@ -5,7 +5,7 @@
     --text: #ffffff;
     --text-dim: #a0a0a0;
     --error: #de6c6c;
-    --success: #84de84;
+    --success: rgb(54 54 54 / 0, 77);
     --sidebar-width: 260px;
 }
 

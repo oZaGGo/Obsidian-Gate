@@ -185,7 +185,7 @@ h1 {
 
 .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: bold; }
-.dot { width: 12px; height: 12px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px black; }
+.dot { width: 12px; height: 12px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px rgb(0 0 0 / 0); }
 
 .progress-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 10px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--accent); transition: 0.5s ease-out; }
@@ -199,7 +199,7 @@ h1 {
 
 /* CONSOLE */
 
-.console-container { background: #050505; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; height: 55vh; }
+.console-container { background: #050505; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; height: 48dvh; max-height: 55dvh; max-width: 140vh }
 .console-header { padding: 10px 15px; background: #1a1c29; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-dim); }
 .console-body { flex-grow: 1; padding: 15px; font-family: 'Consolas', monospace; font-size: 0.85rem; overflow-y: auto; color: #ccc; }
 .console-body .line { margin-bottom: 4px; line-height: 1.4; }
@@ -247,6 +247,7 @@ h1 {
     flex-direction: column;
     gap: 15px;
     min-height: 0;
+    max-width: 100dvh;
 }
 
 .settings-card h3 {

@@ -331,7 +331,7 @@ async function checkServerStatus() {
             online = false;
         }
     } catch (e) {
-        dot.style.background = "#95a5a6";
+        dot.style.background = "rgb(0 0 0 / 0)";
     }
 }
 
