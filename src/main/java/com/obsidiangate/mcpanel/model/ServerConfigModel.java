@@ -37,7 +37,7 @@ public class ServerConfigModel {
     private int maxPlayers = 20;
 
     @Column(nullable = false)
-    private int rconPort = 25575;
+    private int serverPort = 25565;
 
     @Column(nullable = false)
     private boolean firstSetup = true;
