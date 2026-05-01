@@ -1,6 +1,14 @@
 package com.obsidiangate.mcpanel.util.listener;
 
 import com.obsidiangate.mcpanel.config.AppConfig;
+import com.obsidiangate.mcpanel.dto.UserDTO;
+import com.obsidiangate.mcpanel.model.UserAuth;
+import com.obsidiangate.mcpanel.model.World;
+import com.obsidiangate.mcpanel.repository.UserAuthRepository;
+import com.obsidiangate.mcpanel.repository.WorldRepository;
+import com.obsidiangate.mcpanel.service.PropertiesService;
+import com.obsidiangate.mcpanel.service.WorldConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
@@ -13,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 @Component
 public class ApplicationReadyListener {
@@ -25,6 +34,15 @@ public class ApplicationReadyListener {
 
     private final ObjectMapper objectMapper;
 
+    @Autowired
+    private UserAuthRepository userAuthRepository;
+
+    @Autowired
+    private WorldRepository worldRepository;
+
+    @Autowired
+    private WorldConfigService worldConfigService;
+
     public ApplicationReadyListener(Environment environment, AppConfig appConfig, ObjectMapper objectMapper) {
         this.environment = environment;
         this.appConfig = appConfig;
@@ -35,13 +53,59 @@ public class ApplicationReadyListener {
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
+
+        loadOrCreateConfig();
+
+        //First setup
+        if (appConfig.isFirstSetup()) {
+            System.out.println("\n[First Setup] Detected first setup. Please configure your server by editing the server-config.json file.");
+            System.out.println();
+            System.out.println("\n[First Setup] Creating SYSTEM user...");
+            createSystemUser();
+            System.out.println("\n[First Setup] Creating default world...");
+            createDefaultWorld();
+            appConfig.setFirstSetup(false);
+            // Save initial config
+            saveConfig();
+        }else {
+            System.out.println("\n[Startup] Loading configuration...");
+            loadOrCreateConfig();
+        }
+
         System.out.println();
-        loadOrSaveConfig();
         printStartupBanner();
         System.out.println();
     }
 
-    private void loadOrSaveConfig() {
+
+    private void createDefaultWorld(){
+        World world = new World();
+
+        world.setName("world");
+        world.setDifficulty("normal");
+        world.setGamemode("survival");
+        world.setHardcore(false);
+        world.setCurrent(true);
+
+        worldRepository.save(world);
+
+        worldConfigService.setActiveWorld("world");
+
+        System.out.println("\n[First Setup] Default world created.");
+    }
+
+    private void createSystemUser(){
+        UserAuth systemUser = new UserAuth();
+        systemUser.setUsername("SYSTEM");
+        systemUser.setToken(UUID.randomUUID().toString());
+        systemUser.setPassword(UUID.randomUUID().toString());
+        systemUser.setAdmin(false);
+        userAuthRepository.save(systemUser);
+        appConfig.setSystemUsrToken(systemUser.getToken());
+        System.out.println("\n[First Setup] SYSTEM user created with token: " + systemUser.getToken());
+    }
+
+    private void loadOrCreateConfig() {
         File file = new File(CONFIG_FILE);
         try {
             if (file.exists()) {
@@ -50,6 +114,7 @@ public class ApplicationReadyListener {
                 appConfig.setAuthTimeMins(loadedConfig.getAuthTimeMins());
                 appConfig.setFirstSetup(loadedConfig.isFirstSetup());
                 appConfig.setAiToken(loadedConfig.getAiToken());
+                appConfig.setSystemUsrToken(loadedConfig.getSystemUsrToken());
 
                 System.out.println("[Config] server-config.json loaded successfully.");
             } else {
@@ -65,6 +130,19 @@ public class ApplicationReadyListener {
             System.err.println("[Config] Critical error handling server-config.json: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("[Config] IO error handling server-config.json: " + e.getMessage());
+        }
+
+    }
+
+    private void saveConfig(){
+        File file = new File(CONFIG_FILE);
+        try {
+            if (file.exists()) {
+                objectMapper.writeValue(file, appConfig);
+                System.out.println("[Config] server-config.json saved successfully.");
+            }
+        } catch (JacksonException e) {
+            System.err.println("[Config] Critical error handling server-config.json: " + e.getMessage());
         }
 
     }

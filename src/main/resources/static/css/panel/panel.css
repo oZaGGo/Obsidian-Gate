@@ -587,6 +587,7 @@ input[type="text"]:focus {
 .badge-log-worldconfig { color: #dbb26b; border: 1px solid #dbb26b; }
 .badge-log-worldmanagement { color: #f26d6d; border: 1px solid #f26d6d; }
 .badge-log-serverruntime { color: #5fc78f; border: 1px solid #5fc78f; }
+.badge-log-minecraft { color: #deda5e; border: 1px solid #deda5e; }
 
 [class^="badge-log-"] {
     padding: 2px 8px;

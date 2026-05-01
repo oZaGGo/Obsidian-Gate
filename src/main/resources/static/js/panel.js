@@ -1,3 +1,8 @@
+// State variables
+
+let logType = null
+
+
 const router = {
     async load(viewName) {
         const container = document.getElementById('view-container');
@@ -129,16 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(() => {
 
+        //Session
+        checkSession();
+        checkAdminPermissions();
+
         if (document.getElementById('cpu-usage')) {
-            checkSession();
-            checkAdminPermissions();
             if (online){
                 refreshMetrics()
+                checkServerStatus();
+                refreshLogs();
             }
-            checkServerStatus();
-            refreshLogs();
         }
-    }, 1000);
+
+        if (document.getElementById('log-list-body')){
+            filterLogs(logType, document.querySelector('.btn-filter.active'));
+        }
+    }, 500);
 });
 
 function logout() {
@@ -839,6 +850,8 @@ async function deleteUser(username) {
 async function filterLogs(type, buttonElement) {
     document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
     buttonElement.classList.add('active');
+
+    logType = type
 
     const token = localStorage.getItem('mc_token');
     const url = type ? `/api/logs/recent?type=${type}` : '/api/logs/recent';
