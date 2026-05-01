@@ -72,6 +72,8 @@
     padding: 20px;
     background: #151722;
     border-top: 1px solid #2d2f3f;
+    justify-content: center;
+    align-items: center;
 }
 
 .user-info { margin-bottom: 15px; }
@@ -81,6 +83,7 @@
 .btn-logout {
     width: 100%;
     padding: 8px;
+    margin: 8px;
     background: transparent;
     border: 1px solid var(--error);
     color: var(--error);
@@ -611,4 +614,35 @@ input[type="text"]:focus {
     font-size: 0.7rem;
     font-weight: bold;
     display: inline-block;
+}
+
+/* --- CHANGELOG --- */
+
+.version-tag {
+    font-size: 0.7rem;
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.changelog-btn {
+    background: transparent;
+    border: none;
+    align-items: center;
+    color: var(--text-dim);
+    padding: 8px 5px;
+    text-align: left;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+}
+
+.changelog-btn:hover {
+    background: #2a2d3d;
+    color: var(--text);
 }

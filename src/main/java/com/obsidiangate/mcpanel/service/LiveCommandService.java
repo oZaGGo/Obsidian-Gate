@@ -5,7 +5,6 @@ import com.obsidiangate.mcpanel.dto.SystemMetricsDTO;
 import com.obsidiangate.mcpanel.util.ai.AIChat;
 import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
 import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -166,32 +165,31 @@ public class LiveCommandService {
     }
 
     private void tpsInfo(ServerRuntimeService service) {
-        double tps = calculateTPS(service);
-
-        String color;
-        String status;
-
-        // Scale
-        if (tps >= 19.9) {
-            color = "green";
-            status = "PERFECT";
-        } else if (tps >= 18.5) {
-            color = "yellow";
-            status = "GOOD";
-        } else {
-            color = "red";
-            status = "LAG";
-        }
-
-        String tpsJson = String.format(
-                "[\"\",{\"text\":\"[Metrics] \",\"color\":\"gray\"}," +
-                        "{\"text\":\"TPS: %.2f \",\"color\":\"%s\"}," +
-                        "{\"text\":\"(%s)\",\"color\":\"%s\",\"bold\":true}]",
-                tps, color, status, color
-        );
-
         userTpsCalcStatus.forEach((playerName, active) -> {
             if (active) {
+                double tps = calculateTPS(service);
+
+                String color;
+                String status;
+
+                // Scale
+                if (tps >= 19.9) {
+                    color = "green";
+                    status = "PERFECT";
+                } else if (tps >= 18.5) {
+                    color = "yellow";
+                    status = "GOOD";
+                } else {
+                    color = "red";
+                    status = "LAG";
+                }
+
+                String tpsJson = String.format(
+                        "[\"\",{\"text\":\"[Metrics] \",\"color\":\"gray\"}," +
+                                "{\"text\":\"TPS: %.2f \",\"color\":\"%s\"}," +
+                                "{\"text\":\"(%s)\",\"color\":\"%s\",\"bold\":true}]",
+                        tps, color, status, color
+                );
                 service.sendCommand("tellraw " + playerName + " " + tpsJson);
             }
         });

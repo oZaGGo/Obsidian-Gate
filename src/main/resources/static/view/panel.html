@@ -26,13 +26,13 @@
                 <img src="../image/icon/world.png" alt="World" class="menu-icon"> World
             </button>
             <button onclick="router.load('command')" class="menu-item">
-                <img src="../image/icon/command.png" alt="Security" class="menu-icon"> Commands
+                <img src="../image/icon/command.png" alt="Commands" class="menu-icon"> Commands
             </button>
             <button onclick="router.load('security')" class="menu-item">
                 <img src="../image/icon/shield.png" alt="Security" class="menu-icon"> Security
             </button>
             <button id="nav-log" onclick="router.load('log')" class="menu-item">
-                <img src="../image/icon/log.png" alt="Security" class="menu-icon"> Logger
+                <img src="../image/icon/log.png" alt="Logger" class="menu-icon"> Logger
             </button>
         </nav>
 
@@ -41,6 +41,10 @@
                 <small id="txt-username">-</small>
             </div>
             <button onclick="logout()" class="btn-logout">Log out</button>
+            <button onclick="router.load('changelog')" class="changelog-btn">
+                <img src="../image/icon/changelog.png" alt="Changelog" class="menu-icon"> Changelog
+                <span class="version-tag">v0.1.0-a</span>
+            </button>
             <div class="credits">
                 <p>Created by <a href="https://github.com/oZaGGo" target="_blank">@ZaGG</a></p>
             </div>
