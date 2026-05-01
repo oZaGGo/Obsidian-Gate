@@ -37,11 +37,12 @@
         </nav>
 
         <div class="sidebar-user">
-            <div class="user-info">
+            <div class="user-info" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+                <img src="../image/user.png" alt="World" class="user-icon">
                 <small id="txt-username">-</small>
             </div>
             <button onclick="logout()" class="btn-logout">Log out</button>
-            <button onclick="router.load('changelog')" class="changelog-btn">
+            <button onclick="router.load('changelog')" class="changelog-btn" style="display: flex; align-items: center; justify-content: center; width: 100%; margin: 10px 0;">
                 <img src="../image/icon/changelog.png" alt="Changelog" class="menu-icon"> Changelog
                 <span class="version-tag">v0.1.0-a</span>
             </button>
