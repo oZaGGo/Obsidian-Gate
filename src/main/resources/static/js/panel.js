@@ -72,6 +72,34 @@ const router = {
 
             });
         }
+        if(viewName === 'backup'){
+            getBackupWorld()
+            checkBackupWorldExists()
+
+            let debounceTimer;
+            document.getElementById('backup-world').addEventListener('input', function(e) {
+                const name = e.target.value.trim();
+                const inputElement = e.target;
+
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    if (!name) {
+                        inputElement.style.color = '';
+                        return;
+                    }
+
+                    const response = await fetch(`/api/world/${encodeURIComponent(name)}`, {
+                        headers: { 'Authorization': localStorage.getItem('mc_token') }
+                    });
+
+                    const data = await response.json();
+                    inputElement.style.color = data.world ? '#5fc78f' : '#dbb26b';
+                    inputElement.style.fontWeight = data.world ? 'bold' : 'normal';
+                }, 300);
+
+            });
+        }
+
         if (viewName === 'security') {
             loadUsers()
         }
@@ -491,7 +519,7 @@ async function loadWorldView() {
         const currentWorld = await currentRes.json().catch(() => null);
 
         if (currentWorld) {
-            document.getElementById('world-name').value = currentWorld.nombre;
+            document.getElementById('world-name').value = currentWorld.name;
             document.getElementById('world-seed').value = currentWorld.seed || '';
             document.getElementById('world-difficulty').value = currentWorld.difficulty;
             document.getElementById('world-gamemode').value = currentWorld.gamemode;
@@ -541,7 +569,7 @@ function renderWorldTable(worlds) {
         const row = document.createElement('tr');
 
         row.innerHTML = `
-            <td>${escapeHTML(w.nombre)}</td>
+            <td>${escapeHTML(w.name)}</td>
             <td><span class="badge badge-gm">${escapeHTML(w.gamemode)}</span></td>
             <td><span class="badge badge-diff">${escapeHTML(w.difficulty)}</span></td>
             <td>${escapeHTML(w.hardcore)}</td>
@@ -568,13 +596,13 @@ function renderWorldTable(worlds) {
             const btnSet = document.createElement('button');
             btnSet.className = 'btn-select';
             btnSet.textContent = 'Set Default';
-            btnSet.onclick = () => setWorldDefault(w.nombre);
+            btnSet.onclick = () => setWorldDefault(w.name);
             btnContainer.appendChild(btnSet);
 
             const btnDel = document.createElement('button');
             btnDel.className = 'btn-delete';
             btnDel.textContent = 'Delete';
-            btnDel.onclick = () => deleteWorld(w.nombre);
+            btnDel.onclick = () => deleteWorld(w.name);
             btnContainer.appendChild(btnDel);
         }
 
@@ -904,4 +932,84 @@ function renderLogTable(logs) {
 
         tbody.appendChild(row);
     });
+}
+
+// Backups
+
+async function createBackup() {
+    const nameInput = document.getElementById('backup-alias');
+    const nameWorld = document.getElementById('backup-world');
+
+    try {
+        const token = localStorage.getItem('mc_token')
+
+        const response = await fetch(`/api/backup/create?alias=${encodeURIComponent(nameInput.value)}&name=${encodeURIComponent(nameWorld.value)}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            alert("Backup created successfully")
+        } else {
+            const errorData = await response.text();
+            alert("Error creating backup: " + errorData);
+        }
+    } catch (error) {
+        alert("Server error");
+    }
+}
+
+async function getBackupWorld() {
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const currentRes = await fetch('/api/world/current', {
+            headers: { 'Authorization': token }
+        });
+
+        const currentWorld = await currentRes.json().catch(() => null);
+
+        if (currentWorld) {
+            document.getElementById('backup-world').value = currentWorld.name;
+
+        } else {
+            const nameInput = document.getElementById('world-name');
+
+            nameInput.value = '';
+            nameInput.placeholder = 'Type a name for your world...';
+
+            seedInput.value = '';
+            seedInput.placeholder = 'Leave empty for random seed';
+        }
+
+    } catch (error) {
+        console.error("Error loading worlds:", error);
+    }
+}
+
+async function checkBackupWorldExists() {
+    const input = document.getElementById('backup-world');
+    const name = input.value.trim();
+    const token = localStorage.getItem('mc_token');
+
+    if (!name) {
+        input.style.color = '';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/world/${name}`, {
+            headers: { 'Authorization': token }
+        });
+
+        const data = await response.json();
+
+        input.style.color = data.world ? '#5fc78f' : '#dbb26b'
+        input.style.fontWeight = data.world ? 'bold' : 'normal';
+
+    } catch (e) {
+        console.error("Validation error");
+    }
 }

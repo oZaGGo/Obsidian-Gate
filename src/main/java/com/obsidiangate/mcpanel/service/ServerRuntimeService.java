@@ -33,6 +33,7 @@ public class ServerRuntimeService {
     private final List<String> consoleLogs = new ArrayList<>();
 
     private final String serverPath = Paths.get(System.getProperty("user.dir"), "mc_server").toString();
+
     private final String jarName = "server.jar";
 
     private static final Pattern CHAT_PATTERN = Pattern.compile("<(\\w+)> (.*)");
