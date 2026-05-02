@@ -41,32 +41,42 @@ public class WorldManagementService {
     public void deleteWorldFolder(String worldName) {
         Path worldPath = Paths.get(System.getProperty("user.dir"), "mc_server", worldName);
 
+        // Delete associated backups (physical files and DB records)
+        List<Backup> backups = backupRepository.findByWorld(worldName);
+        for (Backup backup : backups) {
+            try {
+                Path backupPath = Paths.get(backup.getPath());
+                Files.deleteIfExists(backupPath);
+            } catch (IOException e) {
+                System.err.println("Could not delete backup file: " + backup.getPath());
+            }
+        }
+        backupRepository.deleteAll(backups);
+
+        // Delete the world folder
         if (Files.exists(worldPath)) {
             try {
-                // Files.walk generates an stream with all files and subdirectories
                 Files.walk(worldPath)
-                        // Order by reverse to delete files before directories
                         .sorted(Comparator.reverseOrder())
                         .map(Path::toFile)
                         .forEach(java.io.File::delete);
 
-                System.out.println("Successfully deleted world folder: " + worldName);
+                System.out.println("Successfully deleted world folder and backups for: " + worldName);
             } catch (IOException e) {
-                // If an error occurs, it might be because the server is still using files in that world folder. In that case, we throw a RuntimeException to be handled by the controller.
-                throw new RuntimeException("Could not delete world folder. Files might be in use by the Minecraft server: " + e.getMessage());
+                throw new RuntimeException("Could not delete world folder. Files might be in use: " + e.getMessage());
             }
         }
     }
 
     public void createBackup(String name, String alias) {
         new Thread(() -> {
-            String zipName = alias.isEmpty() ? "backup" : alias;
             isProcessingBackup = true;
             backupThreadFailed = false;
 
             try {
                 Path worldPath = Paths.get(serverPath, name);
                 String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
+                String zipName = alias.isEmpty() ? timestamp + "-BACKUP"  : alias;
                 Path pathFinal = Paths.get(backupsPath, zipName + "_" + timestamp + ".zip");
 
                 if (serverRuntimeService.isRunning()) {
@@ -76,7 +86,12 @@ public class WorldManagementService {
 
                     if (!response.isEmpty()) {
                         boolean success = zipCompressor.getZip(worldPath, pathFinal, serverRuntimeService, this, name, zipName);
-                        if (success) registerBackupInDatabase(pathFinal, zipName, name);
+                        if (success) {
+                            registerBackupInDatabase(pathFinal, zipName, name);
+                            serverRuntimeService.sendCommand("say [SYSTEM] A backup of the world was created. You can find it in the server panel.");
+                        } else {
+                            cleanupFailedBackup();
+                        }
                     } else {
                         // Abort if save-all fails
                         cleanupFailedBackup();

@@ -75,6 +75,7 @@ const router = {
         if(viewName === 'backup'){
             updateBackupWorldSelect()
             loadBackups()
+            loadCurrentSchedule();
         }
 
         if (viewName === 'security') {
@@ -588,7 +589,7 @@ function renderWorldTable(worlds) {
 }
 
 async function deleteWorld(worldName) {
-    if (!confirm(`Are you sure you want to delete the world "${worldName}"?`)) return;
+    if (!confirm(`Are you sure you want to delete the world "${worldName}" and all backups related?`)) return;
 
     try {
         const response = await fetch(`/api/world/delete?name=${worldName}`, {
@@ -1135,5 +1136,48 @@ async function deleteBackup(alias) {
     } catch (error) {
         console.error("Delete error:", error);
         alert("Server error during deletion");
+    }
+}
+
+async function loadCurrentSchedule() {
+    const token = localStorage.getItem('mc_token');
+    const select = document.getElementById('schedule-interval');
+
+    try {
+        const response = await fetch('/api/backup/schedule-interval', {
+            headers: { 'Authorization': token }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            select.value = data.interval;
+        }
+    } catch (error) {
+        console.error("Error loading schedule:", error);
+    }
+}
+
+async function saveSchedule() {
+    const token = localStorage.getItem('mc_token');
+    const intervalValue = document.getElementById('schedule-interval').value;
+
+    try {
+        const response = await fetch(`/api/backup/schedule-interval?interval=${encodeURIComponent(intervalValue)}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            loadCurrentSchedule();
+            alert(`Schedule updated.`);
+        } else {
+            const error = await response.text();
+            alert("Error updating schedule: " + error);
+        }
+    } catch (error) {
+        console.error("Save schedule error:", error);
+        alert("Server error while saving schedule");
     }
 }

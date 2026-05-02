@@ -14,7 +14,5 @@ public interface BackupRepository extends JpaRepository<Backup, Long> {
 
     List<Backup> findAllByOrderByBackupDateDesc();
 
-    boolean existsByAlias(String alias);
-
-    void deleteByAlias(String alias);
+    List<Backup> findByWorld(String world);
 }

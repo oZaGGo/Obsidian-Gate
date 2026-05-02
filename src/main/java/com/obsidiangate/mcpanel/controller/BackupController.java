@@ -1,5 +1,6 @@
 package com.obsidiangate.mcpanel.controller;
 
+import com.obsidiangate.mcpanel.config.AppConfig;
 import com.obsidiangate.mcpanel.dto.BackupDTO;
 import com.obsidiangate.mcpanel.service.AuthService;
 import com.obsidiangate.mcpanel.service.LogService;
@@ -26,6 +27,9 @@ public class BackupController {
 
     @Autowired
     private LogService logService;
+
+    @Autowired
+    private AppConfig appConfig;
 
     @PostMapping("/create")
     public ResponseEntity<?> createBackup(
@@ -110,6 +114,35 @@ public class BackupController {
             return ResponseEntity.ok(Map.of("message", "Backup deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/schedule-interval")
+    public ResponseEntity<?> getScheduleInterval(@RequestHeader("Authorization") String token) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        return ResponseEntity.ok(Map.of("interval", appConfig.getBackupTime()));
+    }
+
+    @PostMapping("/schedule-interval")
+    public ResponseEntity<?> updateScheduleInterval(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String interval) {
+
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        try {
+            appConfig.setBackupTime(interval);
+
+            logService.registerEntry(token, "Changed backup schedule to: " + interval, LogEntryType.WORLDMANAGEMENT);
+
+            return ResponseEntity.ok(Map.of("message", "Schedule interval updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating interval: " + e.getMessage());
         }
     }
 }

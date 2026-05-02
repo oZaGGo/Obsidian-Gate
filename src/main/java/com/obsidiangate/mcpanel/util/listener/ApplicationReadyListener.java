@@ -1,13 +1,12 @@
 package com.obsidiangate.mcpanel.util.listener;
 
 import com.obsidiangate.mcpanel.config.AppConfig;
-import com.obsidiangate.mcpanel.dto.UserDTO;
 import com.obsidiangate.mcpanel.model.UserAuth;
 import com.obsidiangate.mcpanel.model.World;
 import com.obsidiangate.mcpanel.repository.UserAuthRepository;
 import com.obsidiangate.mcpanel.repository.WorldRepository;
-import com.obsidiangate.mcpanel.service.PropertiesService;
 import com.obsidiangate.mcpanel.service.WorldConfigService;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -115,6 +114,7 @@ public class ApplicationReadyListener {
                 appConfig.setFirstSetup(loadedConfig.isFirstSetup());
                 appConfig.setAiToken(loadedConfig.getAiToken());
                 appConfig.setSystemUsrToken(loadedConfig.getSystemUsrToken());
+                appConfig.setBackupTime(loadedConfig.getBackupTime());
 
                 System.out.println("[Config] server-config.json loaded successfully.");
             } else {
@@ -134,6 +134,7 @@ public class ApplicationReadyListener {
 
     }
 
+    @PreDestroy
     private void saveConfig(){
         File file = new File(CONFIG_FILE);
         try {
