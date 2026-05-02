@@ -18,6 +18,9 @@ public class Backup {
     @Column(nullable = false)
     private String path;
 
+    @Column(nullable = false)
+    private String world;
+
     @Column(unique = true, nullable = false, length = 50)
     private String alias;
 

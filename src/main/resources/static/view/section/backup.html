@@ -9,20 +9,25 @@
         <!-- CARD: CREATE MANUAL BACKUP -->
         <div class="settings-card">
             <h3>Create New Backup</h3>
-            <div class="input-group" style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
-                <div class="field-container">
-                    <label for="backup-alias" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #ccc;">Backup Alias</label>
-                    <input type="text" id="backup-alias" placeholder=""
-                           style="width: 100%; padding: 10px; border-radius: 4px; background: #1a1a1a; color: white; border: 1px solid #444; box-sizing: border-box;">
+            <div class="world-config-form" style="margin-top: 15px;">
+
+                <div class="form-group">
+                    <label for="backup-alias">Backup Alias</label>
+                    <input type="text" id="backup-alias" placeholder="e.g. Pre-Update">
                 </div>
-                <div class="field-container">
-                    <label for="backup-world" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #ccc;">Backup World</label>
-                    <input type="text" id="backup-world" placeholder=""
-                           style="width: 100%; padding: 10px; border-radius: 4px; background: #1a1a1a; color: #5fc78f !important; border: 1px solid #444; box-sizing: border-box;">
+
+                <div class="form-group">
+                    <label for="backup-world-select">Select World <i style="color: #f26d6d">*</i></label>
+                    <select id="backup-world-select" style="color: #5fc78f; font-weight: bold;">
+                        <option value="" disabled selected>Loading worlds...</option>
+                    </select>
                 </div>
-                <button id="btn-backup-create" class="btn btn-save-small" style="width: 100%; justify-content: center; padding: 12px; font-weight: bold;" onclick="createBackup()">
-                    <i class="fas fa-save" style="margin-right: 8px;"></i> Start Backup
-                </button>
+
+                <div class="form-group" style="margin-top: 10px;">
+                    <button id="btn-backup-create" class="btn btn-save-small" style="width: 100%; justify-content: center;" onclick="createBackup()">
+                        <i class="fas fa-save" style="margin-right: 8px;"></i> Start Backup
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -55,29 +60,15 @@
             <table class="world-table" style="table-layout: fixed; width: 100%; border-collapse: collapse;">
                 <thead>
                 <tr style="text-align: left; border-bottom: 2px solid #333;">
-                    <th style="width: 200px; padding: 12px;">Alias</th>
-                    <th style="width: 250px;">File Name</th>
+                    <th style="width: 150px; padding: 12px;">Alias</th>
+                    <th style="width: 120px;">World</th> <!-- Nueva Columna -->
+                    <th style="width: 200px;">File Name</th>
                     <th style="width: 160px;">Date</th>
-                    <th style="width: 100px;">Size</th>
+                    <th style="width: 90px;">Size</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="backup-list-body">
-                <!-- Example Row 2 -->
-                <tr style="border-bottom: 1px solid #222;">
-                    <td style="color: #e0e0e0; font-weight: 600;">Survival Mods</td>
-                    <td style="font-size: 0.85em; color: #888;">Survival_20260428.zip</td>
-                    <td>04/28/2026 15:40</td>
-                    <td>1.2 GB</td>
-                    <td style="text-align: right; display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 12px 0;">
-                        <button class="btn-select" onclick="restoreBackup('Survival_20260428.zip')">
-                            <i class="fas fa-undo-alt"></i> Restore
-                        </button>
-                        <button class="btn-delete" onclick="deleteBackup('Survival_20260428.zip')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </td>
-                </tr>
                 </tbody>
             </table>
         </div>

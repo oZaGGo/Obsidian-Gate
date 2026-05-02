@@ -73,31 +73,8 @@ const router = {
             });
         }
         if(viewName === 'backup'){
-            getBackupWorld()
-            checkBackupWorldExists()
-
-            let debounceTimer;
-            document.getElementById('backup-world').addEventListener('input', function(e) {
-                const name = e.target.value.trim();
-                const inputElement = e.target;
-
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(async () => {
-                    if (!name) {
-                        inputElement.style.color = '';
-                        return;
-                    }
-
-                    const response = await fetch(`/api/world/${encodeURIComponent(name)}`, {
-                        headers: { 'Authorization': localStorage.getItem('mc_token') }
-                    });
-
-                    const data = await response.json();
-                    inputElement.style.color = data.world ? '#5fc78f' : '#dbb26b';
-                    inputElement.style.fontWeight = data.world ? 'bold' : 'normal';
-                }, 300);
-
-            });
+            updateBackupWorldSelect()
+            loadBackups()
         }
 
         if (viewName === 'security') {
@@ -938,12 +915,17 @@ function renderLogTable(logs) {
 
 async function createBackup() {
     const nameInput = document.getElementById('backup-alias');
-    const nameWorld = document.getElementById('backup-world');
+    const selectWorld = document.getElementById('backup-world-select');
+
+    if (!selectWorld.value) {
+        alert("Please select a world from the list.");
+        return;
+    }
 
     try {
-        const token = localStorage.getItem('mc_token')
+        const token = localStorage.getItem('mc_token');
 
-        const response = await fetch(`/api/backup/create?alias=${encodeURIComponent(nameInput.value)}&name=${encodeURIComponent(nameWorld.value)}`, {
+        const response = await fetch(`/api/backup/create?alias=${encodeURIComponent(nameInput.value)}&name=${encodeURIComponent(selectWorld.value)}`, {
             method: 'POST',
             headers: {
                 'Authorization': token
@@ -951,65 +933,207 @@ async function createBackup() {
         });
 
         if (response.ok) {
-            alert("Backup created successfully")
+            await loadBackups()
+            alert("Backup created successfully");
+            nameInput.value = '';
         } else {
             const errorData = await response.text();
             alert("Error creating backup: " + errorData);
         }
     } catch (error) {
+        console.error("Backup error:", error);
         alert("Server error");
     }
 }
 
-async function getBackupWorld() {
+async function updateBackupWorldSelect() {
+    const backupSelect = document.getElementById('backup-world-select');
+    const token = localStorage.getItem('mc_token');
+
+    const allRes = await fetch('/api/world/all', {
+        headers: { 'Authorization': token }
+    });
+    const worlds = await allRes.json();
+
+    if (!backupSelect) return;
+
+    backupSelect.innerHTML = '';
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    defaultOption.style.color = "white";
+    defaultOption.textContent = "Select a world to backup...";
+    backupSelect.appendChild(defaultOption);
+
+    worlds.forEach(w => {
+        const option = document.createElement('option');
+        option.value = w.name;
+        option.textContent = w.current ? `${w.name} (Active)` : w.name;
+
+        if (w.current) {
+            option.dataset.active = "true";
+            option.style.color = "#5fc78f";
+        } else {
+            option.style.color = "white";
+        }
+
+        backupSelect.appendChild(option);
+    });
+
+    backupSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        this.style.color = selectedOption.dataset.active === "true" ? "#5fc78f" : "white";
+    });
+
+    backupSelect.style.color = "white";
+}
+
+async function loadBackups() {
     const token = localStorage.getItem('mc_token');
 
     try {
-        const currentRes = await fetch('/api/world/current', {
+        const response = await fetch('/api/backup/list', {
             headers: { 'Authorization': token }
         });
 
-        const currentWorld = await currentRes.json().catch(() => null);
+        if (response.ok) {
+            const backups = await response.json();
 
-        if (currentWorld) {
-            document.getElementById('backup-world').value = currentWorld.name;
-
+            console.log("Loaded backups:", backups);
+            renderBackupTable(backups);
         } else {
-            const nameInput = document.getElementById('world-name');
-
-            nameInput.value = '';
-            nameInput.placeholder = 'Type a name for your world...';
-
-            seedInput.value = '';
-            seedInput.placeholder = 'Leave empty for random seed';
+            console.error("Failed to load backups");
         }
-
     } catch (error) {
-        console.error("Error loading worlds:", error);
+        console.error("Error fetching backups:", error);
     }
 }
 
-async function checkBackupWorldExists() {
-    const input = document.getElementById('backup-world');
-    const name = input.value.trim();
-    const token = localStorage.getItem('mc_token');
+function renderBackupTable(backups) {
+    const tbody = document.getElementById('backup-list-body');
+    tbody.innerHTML = '';
 
-    if (!name) {
-        input.style.color = '';
+    const formatBytes = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    };
+
+    backups.forEach(b => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = "1px solid #222";
+
+        const tdAlias = document.createElement('td');
+        tdAlias.style.cssText = "color: #e0e0e0; font-weight: 600; padding: 12px;";
+        tdAlias.textContent = b.alias;
+
+        const tdWorld = document.createElement('td');
+        tdWorld.style.color = "#5fc78f";
+        tdWorld.textContent = b.world;
+
+        const tdFile = document.createElement('td');
+        tdFile.style.cssText = "font-size: 0.85em; color: #888;";
+        tdFile.textContent = b.path;
+
+        const tdDate = document.createElement('td');
+        tdDate.textContent = formatDate(b.backupDate);
+
+        const tdSize = document.createElement('td');
+        tdSize.textContent = formatBytes(b.size);
+
+        const tdActions = document.createElement('td');
+        tdActions.style.cssText = "text-align: right; display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 12px 0;";
+
+        const btnRestore = document.createElement('button');
+        btnRestore.className = 'btn-select';
+        btnRestore.innerHTML = '<i class="fas fa-undo-alt"></i> Restore';
+        btnRestore.onclick = () => restoreBackup(b.alias,b.world);
+
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn-delete';
+        btnDelete.innerHTML = '<i class="fas fa-trash"></i> Delete';
+        btnDelete.onclick = () => deleteBackup(b.alias);
+
+        tdActions.appendChild(btnRestore);
+        tdActions.appendChild(btnDelete);
+
+        row.appendChild(tdAlias);
+        row.appendChild(tdWorld);
+        row.appendChild(tdFile);
+        row.appendChild(tdDate);
+        row.appendChild(tdSize);
+        row.appendChild(tdActions);
+
+        tbody.appendChild(row);
+    });
+}
+
+async function restoreBackup(alias, world) {
+
+    if (!world) {
+        alert("Please select a world in the dropdown above to define the destination.");
         return;
     }
 
+    if (!confirm(`Are you sure? This will OVERWRITE the current world "${world}" with the backup "${alias}". The server must be STOPPED.`)) {
+        return;
+    }
+
+    const token = localStorage.getItem('mc_token');
+
     try {
-        const response = await fetch(`/api/world/${name}`, {
-            headers: { 'Authorization': token }
+        const response = await fetch(`/api/backup/restore?alias=${encodeURIComponent(alias)}&name=${encodeURIComponent(world)}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            }
         });
 
-        const data = await response.json();
+        if (response.ok) {
+            alert("Restore process started. Please check the console/logs for completion.");
+        } else {
+            const errorData = await response.text();
+            alert("Error: " + errorData);
+        }
+    } catch (error) {
+        console.error("Restore error:", error);
+        alert("Server error during restore");
+    }
+}
 
-        input.style.color = data.world ? '#5fc78f' : '#dbb26b'
-        input.style.fontWeight = data.world ? 'bold' : 'normal';
+async function deleteBackup(alias) {
+    if (!confirm(`Are you sure you want to permanently delete the backup "${alias}"?`)) {
+        return;
+    }
 
-    } catch (e) {
-        console.error("Validation error");
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const response = await fetch(`/api/backup/delete?alias=${encodeURIComponent(alias)}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            alert("Backup deleted successfully");
+            loadBackups();
+        } else {
+            const errorData = await response.text();
+            alert("Error deleting backup: " + errorData);
+        }
+    } catch (error) {
+        console.error("Delete error:", error);
+        alert("Server error during deletion");
     }
 }

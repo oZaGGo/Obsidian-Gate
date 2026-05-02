@@ -250,7 +250,7 @@ h1 {
     flex-direction: column;
     gap: 15px;
     min-height: 0;
-    max-width: 100dvh;
+    max-width: 120dvh;
 }
 
 .settings-card h3 {
