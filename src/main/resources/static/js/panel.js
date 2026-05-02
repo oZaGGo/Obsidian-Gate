@@ -655,7 +655,7 @@ async function saveWorldConfig() {
     }
 
     const worldData = {
-        nombre: nameInput.value.trim().replace(/\s+/g, '_'),
+        name: nameInput.value.trim().replace(/\s+/g, '_'),
         seed: seedInput.value.trim(),
         difficulty: difficultyInput.value,
         gamemode: gamemodeInput.value,
