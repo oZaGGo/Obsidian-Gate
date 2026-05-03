@@ -31,7 +31,7 @@ public class BackupScheduler {
     @Scheduled(cron = "0 0 */12 * * *")
     public void scheduleTwelveHours() {
         if (appConfig.getBackupTime().equals("12h")) {
-            runAutoBackups("Auto-12h");
+            runAutoBackups();
         }
     }
 
@@ -39,7 +39,7 @@ public class BackupScheduler {
     @Scheduled(cron = "0 0 6 * * *")
     public void scheduleDaily() {
         if (appConfig.getBackupTime().equals("daily")) {
-            runAutoBackups("Auto-daily");
+            runAutoBackups();
         }
     }
 
@@ -47,7 +47,7 @@ public class BackupScheduler {
     @Scheduled(cron = "0 0 6 * * MON")
     public void scheduleWeekly() {
         if (appConfig.getBackupTime().equals("weeekly")) {
-            runAutoBackups("Auto-weekly");
+            runAutoBackups();
         }
     }
 
@@ -57,7 +57,7 @@ public class BackupScheduler {
         //System.out.println("[DEBUG-SCHEDULER] Heartbeat at: " + LocalDateTime.now());
     }
 
-    private void runAutoBackups(String prefix) {
+    private void runAutoBackups() {
         Optional<World> worldOpt = worldRepository.findCurrentWorld();
 
         if (worldOpt.isEmpty()) {
@@ -70,7 +70,7 @@ public class BackupScheduler {
         try {
             // Check if another backup is already running to avoid overlaps
             if (worldManagementService.isBackupFinished()) {
-                worldManagementService.createBackup(world.getName(), prefix + "-" + world.getName());
+                worldManagementService.createBackup(world.getName(), null);
                 logService.registerEntry(appConfig.getSystemUsrToken(),
                         "Scheduled backup started for world: " + world.getName(), LogEntryType.WORLDMANAGEMENT);
             } else {
