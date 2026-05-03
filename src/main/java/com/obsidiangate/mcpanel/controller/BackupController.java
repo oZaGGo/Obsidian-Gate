@@ -85,6 +85,10 @@ public class BackupController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
+        if (!authService.isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
         try {
             if (worldManagementService.isBackupFinished()) {
                 worldManagementService.restoreBackup(alias, name);
@@ -105,6 +109,10 @@ public class BackupController {
             @RequestParam String alias) {
 
         if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        if (!authService.isAdmin(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
@@ -132,6 +140,10 @@ public class BackupController {
             @RequestParam String interval) {
 
         if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        if (!authService.isAdmin(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 

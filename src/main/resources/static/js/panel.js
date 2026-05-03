@@ -785,9 +785,11 @@ async function loadUsers() {
 async function createNewManager() {
     const nameInput = document.getElementById('new-user-name');
     const passInput = document.getElementById('new-user-password');
+    const isAdminInput = document.getElementById('new-user-is-admin'); // Capturar checkbox
 
     const username = nameInput.value.trim();
     const password = passInput.value.trim();
+    const isAdmin = isAdminInput.checked; // Obtener true/false
 
     if (!username || !password) {
         alert("Please fill in all fields");
@@ -806,20 +808,19 @@ async function createNewManager() {
                 'Content-Type': 'application/json',
                 'Authorization': localStorage.getItem('mc_token')
             },
-            body: JSON.stringify({ username, password, isAdmin: false })
+            body: JSON.stringify({ username, password, isAdmin: isAdmin })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            // Limpiar inputs
             nameInput.value = '';
             passInput.value = '';
-            // Recargar tabla
+            isAdminInput.checked = false;
             loadUsers();
-            alert("Manager created successfully");
+            alert(isAdmin ? "Administrator created successfully" : "Manager created successfully");
         } else {
-            alert(data.message || "Error creating manager");
+            alert(data.message || "Error creating user");
         }
     } catch (e) {
         console.error("Error:", e);

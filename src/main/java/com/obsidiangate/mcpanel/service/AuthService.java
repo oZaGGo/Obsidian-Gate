@@ -112,7 +112,7 @@ public class AuthService {
         UserAuth user = new UserAuth();
         user.setUsername(userDto.getUsername());
         user.setPassword(userDto.getPassword());
-        user.setAdmin(false);
+        user.setAdmin(userDto.isAdmin());
         user.setToken(UUID.randomUUID().toString());
         user.setLastConn(LocalDateTime.now());
 

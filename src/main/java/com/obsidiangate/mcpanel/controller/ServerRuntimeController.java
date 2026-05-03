@@ -67,6 +67,10 @@ public class ServerRuntimeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
+        if (!authService.isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
         if (!serverService.isRunning()) {
             return ResponseEntity.badRequest().body("Server is offline");
         }
