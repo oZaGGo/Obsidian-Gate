@@ -1,8 +1,10 @@
 package com.obsidiangate.mcpanel.config;
 
 import lombok.Data;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
+@Configuration
 @Component
 @Data
 public class PropertiesConfig {

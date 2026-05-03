@@ -72,6 +72,8 @@
     padding: 20px;
     background: #151722;
     border-top: 1px solid #2d2f3f;
+    justify-content: center;
+    align-items: center;
 }
 
 .user-info { margin-bottom: 15px; }
@@ -81,6 +83,7 @@
 .btn-logout {
     width: 100%;
     padding: 8px;
+    margin: 8px;
     background: transparent;
     border: 1px solid var(--error);
     color: var(--error);
@@ -185,7 +188,7 @@ h1 {
 
 .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: bold; }
-.dot { width: 12px; height: 12px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px black; }
+.dot { width: 12px; height: 12px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px rgb(0 0 0 / 0); }
 
 .progress-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 10px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--accent); transition: 0.5s ease-out; }
@@ -199,7 +202,7 @@ h1 {
 
 /* CONSOLE */
 
-.console-container { background: #050505; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; height: 55vh; }
+.console-container { background: #050505; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; height: 48dvh; max-height: 55dvh; max-width: 140vh }
 .console-header { padding: 10px 15px; background: #1a1c29; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-dim); }
 .console-body { flex-grow: 1; padding: 15px; font-family: 'Consolas', monospace; font-size: 0.85rem; overflow-y: auto; color: #ccc; }
 .console-body .line { margin-bottom: 4px; line-height: 1.4; }
@@ -207,6 +210,21 @@ h1 {
 .prompt { color: var(--accent); margin-right: 10px; font-weight: bold; }
 .console-input input { background: transparent; border: none; color: white; width: 100%; outline: none; }
 
+.home-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) rgba(255, 255, 255, 0.05);
+}
+.home-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.home-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+.home-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
 /* SERVER CONFIG */
 
 .settings-container {
@@ -232,6 +250,7 @@ h1 {
     flex-direction: column;
     gap: 15px;
     min-height: 0;
+    max-width: 120dvh;
 }
 
 .settings-card h3 {
@@ -587,6 +606,7 @@ input[type="text"]:focus {
 .badge-log-worldconfig { color: #dbb26b; border: 1px solid #dbb26b; }
 .badge-log-worldmanagement { color: #f26d6d; border: 1px solid #f26d6d; }
 .badge-log-serverruntime { color: #5fc78f; border: 1px solid #5fc78f; }
+.badge-log-minecraft { color: #deda5e; border: 1px solid #deda5e; }
 
 [class^="badge-log-"] {
     padding: 2px 8px;
@@ -594,4 +614,88 @@ input[type="text"]:focus {
     font-size: 0.7rem;
     font-weight: bold;
     display: inline-block;
+}
+
+/* --- CHANGELOG --- */
+
+.version-tag {
+    font-size: 0.7rem;
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.changelog-btn {
+    background: transparent;
+    border: none;
+    align-items: center;
+    color: var(--text-dim);
+    padding: 8px 5px;
+    text-align: left;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+}
+
+.changelog-btn:hover {
+    background: #2a2d3d;
+    color: var(--text);
+}
+
+.user-icon {
+    width: 22px;
+    height: 17px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.change-ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+.change-ul li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 20px;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+.change-ul li::before {
+    content: "•";
+    color: #7d5fff;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+}
+
+.change-group h4 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.text-secondary {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+/* --- BACKUP --- */
+
+#backup-world {
+    color: #5fc78f;
 }

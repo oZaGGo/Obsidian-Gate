@@ -5,5 +5,6 @@ public enum LogEntryType {
     SERVERCONFIG,       // Server config changes
     WORLDCONFIG,        // World config changes
     WORLDMANAGEMENT,     // World management
-    SERVERRUNTIME // Server actions (start, stop, restart)
+    SERVERRUNTIME, // Server actions (start, stop, restart)
+    MINECRAFT // Action inside minecraft world
 }

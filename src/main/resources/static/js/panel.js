@@ -1,3 +1,8 @@
+// State variables
+
+let logType = null
+
+
 const router = {
     async load(viewName) {
         const container = document.getElementById('view-container');
@@ -67,6 +72,12 @@ const router = {
 
             });
         }
+        if(viewName === 'backup'){
+            updateBackupWorldSelect()
+            loadBackups()
+            loadCurrentSchedule();
+        }
+
         if (viewName === 'security') {
             loadUsers()
         }
@@ -129,16 +140,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(() => {
 
+        //Session
+        checkSession();
+        checkAdminPermissions();
+
         if (document.getElementById('cpu-usage')) {
-            checkSession();
-            checkAdminPermissions();
             if (online){
                 refreshMetrics()
+                checkServerStatus();
+                refreshLogs();
             }
-            checkServerStatus();
-            refreshLogs();
         }
-    }, 1000);
+
+        if (document.getElementById('log-list-body')){
+            filterLogs(logType, document.querySelector('.btn-filter.active'));
+        }
+    }, 500);
 });
 
 function logout() {
@@ -320,7 +337,7 @@ async function checkServerStatus() {
             online = false;
         }
     } catch (e) {
-        dot.style.background = "#95a5a6";
+        dot.style.background = "rgb(0 0 0 / 0)";
     }
 }
 
@@ -480,7 +497,7 @@ async function loadWorldView() {
         const currentWorld = await currentRes.json().catch(() => null);
 
         if (currentWorld) {
-            document.getElementById('world-name').value = currentWorld.nombre;
+            document.getElementById('world-name').value = currentWorld.name;
             document.getElementById('world-seed').value = currentWorld.seed || '';
             document.getElementById('world-difficulty').value = currentWorld.difficulty;
             document.getElementById('world-gamemode').value = currentWorld.gamemode;
@@ -530,7 +547,7 @@ function renderWorldTable(worlds) {
         const row = document.createElement('tr');
 
         row.innerHTML = `
-            <td>${escapeHTML(w.nombre)}</td>
+            <td>${escapeHTML(w.name)}</td>
             <td><span class="badge badge-gm">${escapeHTML(w.gamemode)}</span></td>
             <td><span class="badge badge-diff">${escapeHTML(w.difficulty)}</span></td>
             <td>${escapeHTML(w.hardcore)}</td>
@@ -557,13 +574,13 @@ function renderWorldTable(worlds) {
             const btnSet = document.createElement('button');
             btnSet.className = 'btn-select';
             btnSet.textContent = 'Set Default';
-            btnSet.onclick = () => setWorldDefault(w.nombre);
+            btnSet.onclick = () => setWorldDefault(w.name);
             btnContainer.appendChild(btnSet);
 
             const btnDel = document.createElement('button');
             btnDel.className = 'btn-delete';
             btnDel.textContent = 'Delete';
-            btnDel.onclick = () => deleteWorld(w.nombre);
+            btnDel.onclick = () => deleteWorld(w.name);
             btnContainer.appendChild(btnDel);
         }
 
@@ -572,7 +589,7 @@ function renderWorldTable(worlds) {
 }
 
 async function deleteWorld(worldName) {
-    if (!confirm(`Are you sure you want to delete the world "${worldName}"?`)) return;
+    if (!confirm(`Are you sure you want to delete the world "${worldName}" and all backups related?`)) return;
 
     try {
         const response = await fetch(`/api/world/delete?name=${worldName}`, {
@@ -616,7 +633,7 @@ async function saveWorldConfig() {
     }
 
     const worldData = {
-        nombre: nameInput.value.trim().replace(/\s+/g, '_'),
+        name: nameInput.value.trim().replace(/\s+/g, '_'),
         seed: seedInput.value.trim(),
         difficulty: difficultyInput.value,
         gamemode: gamemodeInput.value,
@@ -768,9 +785,11 @@ async function loadUsers() {
 async function createNewManager() {
     const nameInput = document.getElementById('new-user-name');
     const passInput = document.getElementById('new-user-password');
+    const isAdminInput = document.getElementById('new-user-is-admin'); // Capturar checkbox
 
     const username = nameInput.value.trim();
     const password = passInput.value.trim();
+    const isAdmin = isAdminInput.checked; // Obtener true/false
 
     if (!username || !password) {
         alert("Please fill in all fields");
@@ -789,20 +808,19 @@ async function createNewManager() {
                 'Content-Type': 'application/json',
                 'Authorization': localStorage.getItem('mc_token')
             },
-            body: JSON.stringify({ username, password, isAdmin: false })
+            body: JSON.stringify({ username, password, isAdmin: isAdmin })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            // Limpiar inputs
             nameInput.value = '';
             passInput.value = '';
-            // Recargar tabla
+            isAdminInput.checked = false;
             loadUsers();
-            alert("Manager created successfully");
+            alert(isAdmin ? "Administrator created successfully" : "Manager created successfully");
         } else {
-            alert(data.message || "Error creating manager");
+            alert(data.message || "Error creating user");
         }
     } catch (e) {
         console.error("Error:", e);
@@ -839,6 +857,8 @@ async function deleteUser(username) {
 async function filterLogs(type, buttonElement) {
     document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
     buttonElement.classList.add('active');
+
+    logType = type
 
     const token = localStorage.getItem('mc_token');
     const url = type ? `/api/logs/recent?type=${type}` : '/api/logs/recent';
@@ -891,4 +911,274 @@ function renderLogTable(logs) {
 
         tbody.appendChild(row);
     });
+}
+
+// Backups
+
+async function createBackup() {
+    const nameInput = document.getElementById('backup-alias');
+    const selectWorld = document.getElementById('backup-world-select');
+
+    if (!selectWorld.value) {
+        alert("Please select a world from the list.");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('mc_token');
+
+        const response = await fetch(`/api/backup/create?alias=${encodeURIComponent(nameInput.value)}&name=${encodeURIComponent(selectWorld.value)}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            await loadBackups()
+            alert("Backup created successfully");
+            nameInput.value = '';
+        } else {
+            const errorData = await response.text();
+            alert("Error creating backup: " + errorData);
+        }
+    } catch (error) {
+        console.error("Backup error:", error);
+        alert("Server error");
+    }
+}
+
+async function updateBackupWorldSelect() {
+    const backupSelect = document.getElementById('backup-world-select');
+    const token = localStorage.getItem('mc_token');
+
+    const allRes = await fetch('/api/world/all', {
+        headers: { 'Authorization': token }
+    });
+    const worlds = await allRes.json();
+
+    if (!backupSelect) return;
+
+    backupSelect.innerHTML = '';
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    defaultOption.style.color = "white";
+    defaultOption.textContent = "Select a world to backup...";
+    backupSelect.appendChild(defaultOption);
+
+    worlds.forEach(w => {
+        const option = document.createElement('option');
+        option.value = w.name;
+        option.textContent = w.current ? `${w.name} (Active)` : w.name;
+
+        if (w.current) {
+            option.dataset.active = "true";
+            option.style.color = "#5fc78f";
+        } else {
+            option.style.color = "white";
+        }
+
+        backupSelect.appendChild(option);
+    });
+
+    backupSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        this.style.color = selectedOption.dataset.active === "true" ? "#5fc78f" : "white";
+    });
+
+    backupSelect.style.color = "white";
+}
+
+async function loadBackups() {
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const response = await fetch('/api/backup/list', {
+            headers: { 'Authorization': token }
+        });
+
+        if (response.ok) {
+            const backups = await response.json();
+
+            console.log("Loaded backups:", backups);
+            renderBackupTable(backups);
+        } else {
+            console.error("Failed to load backups");
+        }
+    } catch (error) {
+        console.error("Error fetching backups:", error);
+    }
+}
+
+function renderBackupTable(backups) {
+    const tbody = document.getElementById('backup-list-body');
+    tbody.innerHTML = '';
+
+    const formatBytes = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    };
+
+    backups.forEach(b => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = "1px solid #222";
+
+        const tdAlias = document.createElement('td');
+        tdAlias.style.cssText = "color: #e0e0e0; font-weight: 600; padding: 12px;";
+        tdAlias.textContent = b.alias;
+
+        const tdWorld = document.createElement('td');
+        tdWorld.style.color = "#5fc78f";
+        tdWorld.textContent = b.world;
+
+        const tdFile = document.createElement('td');
+        tdFile.style.cssText = "font-size: 0.85em; color: #888;";
+        tdFile.textContent = b.path;
+
+        const tdDate = document.createElement('td');
+        tdDate.textContent = formatDate(b.backupDate);
+
+        const tdSize = document.createElement('td');
+        tdSize.textContent = formatBytes(b.size);
+
+        const tdActions = document.createElement('td');
+        tdActions.style.cssText = "text-align: right; display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 12px 0;";
+
+        const btnRestore = document.createElement('button');
+        btnRestore.className = 'btn-select';
+        btnRestore.innerHTML = '<i class="fas fa-undo-alt"></i> Restore';
+        btnRestore.onclick = () => restoreBackup(b.alias,b.world);
+
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn-delete';
+        btnDelete.innerHTML = '<i class="fas fa-trash"></i> Delete';
+        btnDelete.onclick = () => deleteBackup(b.alias);
+
+        tdActions.appendChild(btnRestore);
+        tdActions.appendChild(btnDelete);
+
+        row.appendChild(tdAlias);
+        row.appendChild(tdWorld);
+        row.appendChild(tdFile);
+        row.appendChild(tdDate);
+        row.appendChild(tdSize);
+        row.appendChild(tdActions);
+
+        tbody.appendChild(row);
+    });
+}
+
+async function restoreBackup(alias, world) {
+
+    if (!world) {
+        alert("Please select a world in the dropdown above to define the destination.");
+        return;
+    }
+
+    if (!confirm(`Are you sure? This will OVERWRITE the current world "${world}" with the backup "${alias}". The server must be STOPPED.`)) {
+        return;
+    }
+
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const response = await fetch(`/api/backup/restore?alias=${encodeURIComponent(alias)}&name=${encodeURIComponent(world)}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            alert("Restore process started. Please check the console/logs for completion.");
+        } else {
+            const errorData = await response.text();
+            alert("Error: " + errorData);
+        }
+    } catch (error) {
+        console.error("Restore error:", error);
+        alert("Server error during restore");
+    }
+}
+
+async function deleteBackup(alias) {
+    if (!confirm(`Are you sure you want to permanently delete the backup "${alias}"?`)) {
+        return;
+    }
+
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const response = await fetch(`/api/backup/delete?alias=${encodeURIComponent(alias)}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            alert("Backup deleted successfully");
+            loadBackups();
+        } else {
+            const errorData = await response.text();
+            alert("Error deleting backup: " + errorData);
+        }
+    } catch (error) {
+        console.error("Delete error:", error);
+        alert("Server error during deletion");
+    }
+}
+
+async function loadCurrentSchedule() {
+    const token = localStorage.getItem('mc_token');
+    const select = document.getElementById('schedule-interval');
+
+    try {
+        const response = await fetch('/api/backup/schedule-interval', {
+            headers: { 'Authorization': token }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            select.value = data.interval;
+        }
+    } catch (error) {
+        console.error("Error loading schedule:", error);
+    }
+}
+
+async function saveSchedule() {
+    const token = localStorage.getItem('mc_token');
+    const intervalValue = document.getElementById('schedule-interval').value;
+
+    try {
+        const response = await fetch(`/api/backup/schedule-interval?interval=${encodeURIComponent(intervalValue)}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            loadCurrentSchedule();
+            alert(`Schedule updated.`);
+        } else {
+            const error = await response.text();
+            alert("Error updating schedule: " + error);
+        }
+    } catch (error) {
+        console.error("Save schedule error:", error);
+        alert("Server error while saving schedule");
+    }
 }

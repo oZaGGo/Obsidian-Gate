@@ -46,7 +46,7 @@ public class ServerConfigService {
         current.setRenderDistance(dto.getRenderDistance());
         current.setSimulationDistance(dto.getSimulationDistance());
         current.setMaxPlayers(dto.getMaxPlayers());
-        current.setRconPort(dto.getRconPort());
+        current.setServerPort(dto.getRconPort());
 
         repository.save(current);
         serverConfigInApp.refresh();

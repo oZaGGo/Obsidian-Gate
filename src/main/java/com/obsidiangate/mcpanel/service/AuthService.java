@@ -9,6 +9,7 @@ import com.obsidiangate.mcpanel.repository.ServerConfigRepository;
 import com.obsidiangate.mcpanel.repository.UserAuthRepository;
 import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -36,6 +37,9 @@ public class AuthService {
     @Autowired
     private ServerConfigRepository serverConfigRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     public boolean authenticate(String token) {
 
         Optional<UserAuth> userOpt = userRepository.findByToken(token);
@@ -61,7 +65,8 @@ public class AuthService {
 
         UserAuth user = new UserAuth();
         user.setUsername(userDto.getUsername());
-        user.setPassword(userDto.getPassword());
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+        user.setPassword(encodedPassword);
         user.setToken(UUID.randomUUID().toString());
         user.setLastConn(LocalDateTime.now());
         user.setAdmin(true);
@@ -83,7 +88,7 @@ public class AuthService {
 
         Optional<UserAuth> userOpt = userRepository.findByUsername(userDTO.getUsername());
 
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(userDTO.getPassword())) {
+        if (userOpt.isPresent() && passwordEncoder.matches(userDTO.getPassword(), userOpt.get().getPassword())) {
             UserAuth user = userOpt.get();
 
             user.setLastConn(LocalDateTime.now());
@@ -111,8 +116,9 @@ public class AuthService {
 
         UserAuth user = new UserAuth();
         user.setUsername(userDto.getUsername());
-        user.setPassword(userDto.getPassword());
-        user.setAdmin(false);
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+        user.setPassword(encodedPassword);
+        user.setAdmin(userDto.isAdmin());
         user.setToken(UUID.randomUUID().toString());
         user.setLastConn(LocalDateTime.now());
 
@@ -144,6 +150,7 @@ public class AuthService {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
+                .filter(user -> !"SYSTEM".equals(user.getUsername()))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }

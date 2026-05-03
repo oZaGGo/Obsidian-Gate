@@ -1,10 +1,13 @@
 <div class="fade-in settings-container">
     <div class="header-section">
-        <h1>Gate Commands</h1>
-        <p style="color: var(--text-dim); margin-top: 5px;">
-            Executable commands directly from the in-game chat. All commands must start with the <code style="color: var(--text); font-weight: bold;">.</code> prefix.
-        </p>
+        <h1>Commands</h1>
     </div>
+
+    <p style="color: var(--text-dim); margin-top: 5px;">
+        Executable commands directly from the in-game chat. All commands must start with the <code style="color: var(--text); font-weight: bold;">.</code> prefix.
+    </p>
+
+    <p></p>
 
     <div class="settings-grid">
         <div class="settings-card">
@@ -30,6 +33,19 @@
             </p>
             <div class="filter-group" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
                 <code style="font-size: 0.9rem; color: var(--text);">Usage: .info &lt;start&gt; | &lt;stop&gt;</code>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="status-icon success" style="width: 10px; height: 10px;"></span>
+                <h3 style="margin: 0;">.tps</h3>
+            </div>
+            <p style="margin-top: 10px; color: var(--text-dim);">
+                Toggles the real-time calculated "tps" (ticks per second).
+            </p>
+            <div class="filter-group" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                <code style="font-size: 0.9rem; color: var(--text);">Usage: .tps &lt;start&gt; | &lt;stop&gt;</code>
             </div>
         </div>
 

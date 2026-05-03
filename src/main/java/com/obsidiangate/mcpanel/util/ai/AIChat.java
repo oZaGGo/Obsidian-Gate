@@ -26,6 +26,9 @@ public class AIChat {
     private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=";
 
     private static final String SYSTEM_CONTEXT = new AIConfig().getContext();
+    private static final int TOKEN_LIMIT = new AIConfig().getTokenLimit();
+    private static final double TEMPERATURE = new AIConfig().getTemperature();
+
 
     public String askAI(String userPrompt) {
         try {
@@ -40,7 +43,7 @@ public class AIChat {
                     new Content("user", List.of(new Part(userPrompt)))
             );
 
-            GenerationConfig genConfig = new GenerationConfig(3000, 0.7);
+            GenerationConfig genConfig = new GenerationConfig(TOKEN_LIMIT, TEMPERATURE);
 
             GeminiRequest request = new GeminiRequest(contents,genConfig);
 

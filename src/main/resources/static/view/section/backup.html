@@ -1,0 +1,74 @@
+<div class="fade-in settings-container">
+    <div class="header-section">
+        <h1>Backup Management</h1>
+        <p style="color: #888;">Manage your Minecraft server backups</p>
+    </div>
+
+    <div class="settings-grid">
+        <div class="settings-card">
+            <h3>Create New Backup</h3>
+            <div class="world-config-form" style="margin-top: 15px;">
+
+                <div class="form-group">
+                    <label for="backup-alias">Backup Alias</label>
+                    <input type="text" id="backup-alias" placeholder="e.g. Pre-Update">
+                </div>
+
+                <div class="form-group">
+                    <label for="backup-world-select">Select World <i style="color: #f26d6d">*</i></label>
+                    <select id="backup-world-select" style="color: #5fc78f; font-weight: bold;">
+                        <option value="" disabled selected>Loading worlds...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px;">
+                    <button id="btn-backup-create" class="btn btn-save-small" style="width: 100%; justify-content: center;" onclick="createBackup()">
+                        <i class="fas fa-save" style="margin-right: 8px;"></i> Start Backup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3>Automatic Scheduling</h3>
+            <div class="input-group" style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+                <div class="field-container">
+                    <label for="schedule-interval" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #ccc;">Backup Frequency</label>
+                    <select id="schedule-interval" class="select-input"
+                            style="width: 100%; padding: 10px; border-radius: 4px; background: #1a1a1a; color: white; border: 1px solid #444; cursor: pointer;">
+                        <option value="none">Disabled</option>
+                        <option value="12h">Every 12 hours</option>
+                        <option value="daily">Daily (Early Morning 06:00 AM)</option>
+                        <option value="weekly">Weekly (Monday)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-filter active" style="width: 100%; justify-content: center; padding: 12px;" onclick="saveSchedule()">
+                    <i class="fas fa-clock" style="margin-right: 8px;"></i> Save Schedule
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- HISTORY TABLE -->
+    <div class="settings-card mt-20">
+        <h3>Stored Backups</h3>
+        <div class="world-list-container">
+            <table class="world-table" style="table-layout: fixed; width: 100%; border-collapse: collapse;">
+                <thead>
+                <tr style="text-align: left; border-bottom: 2px solid #333;">
+                    <th style="width: 150px; padding: 12px;">Alias</th>
+                    <th style="width: 120px;">World</th> <!-- Nueva Columna -->
+                    <th style="width: 200px;">File Name</th>
+                    <th style="width: 160px;">Date</th>
+                    <th style="width: 90px;">Size</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="backup-list-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

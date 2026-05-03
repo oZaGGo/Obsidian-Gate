@@ -40,10 +40,10 @@ public class WorldConfigService {
 
     @Transactional
     public void saveWorld(WorldDTO dto) {
-        World world = worldRepository.findByName(dto.getNombre())
+        World world = worldRepository.findByName(dto.getName())
                 .orElse(new World());
 
-        world.setName(dto.getNombre());
+        world.setName(dto.getName());
         world.setSeed(dto.getSeed());
         world.setDifficulty(dto.getDifficulty());
         world.setGamemode(dto.getGamemode());
@@ -52,7 +52,7 @@ public class WorldConfigService {
 
         worldRepository.save(world);
 
-        setActiveWorld(dto.getNombre());
+        setActiveWorld(dto.getName());
 
         propertiesService.updateProperties();
         propertiesService.saveToFile();
@@ -94,7 +94,7 @@ public class WorldConfigService {
 
     private WorldDTO convertToDTO(World world) {
         WorldDTO dto = new WorldDTO();
-        dto.setNombre(world.getName());
+        dto.setName(world.getName());
         dto.setSeed(world.getSeed());
         dto.setDifficulty(world.getDifficulty());
         dto.setGamemode(world.getGamemode());

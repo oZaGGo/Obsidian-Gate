@@ -1,7 +1,9 @@
 package com.obsidiangate.mcpanel.service;
 
+import com.obsidiangate.mcpanel.config.AppConfig;
 import com.obsidiangate.mcpanel.config.ServerConfig;
 import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
+import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,17 +21,26 @@ public class ServerRuntimeService {
     private ServerConfig serverConfig;
 
     @Autowired
+    private AppConfig appConfig;
+
+    @Autowired
+    private LogService logService;
+
+    @Autowired
     private LiveCommandService liveCommandService;
 
     private Process serverProcess;
     private final List<String> consoleLogs = new ArrayList<>();
 
     private final String serverPath = Paths.get(System.getProperty("user.dir"), "mc_server").toString();
+
     private final String jarName = "server.jar";
 
     private static final Pattern CHAT_PATTERN = Pattern.compile("<(\\w+)> (.*)");
 
     private long startTime = 0;
+
+    private volatile String lastResponseLine = "";
 
     public void startServer() throws IOException {
         if (serverProcess != null && serverProcess.isAlive()) {
@@ -64,6 +75,11 @@ public class ServerRuntimeService {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(serverProcess.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+
+                    this.lastResponseLine = line;
+
+                    detectPlayerJoin(line);
+                    detectPlayerQuit(line);
 
                     String cleanLine = sanitizeLogLine(line);
 
@@ -120,6 +136,28 @@ public class ServerRuntimeService {
                 System.err.println("Error sending command: " + e.getMessage());
             }
         }
+    }
+
+    public String sendCommandWithResponse(String command, String expectedKeyword, long timeoutMillis) {
+        if (!isRunning()) return null;
+
+        this.lastResponseLine = "";
+
+        sendCommand(command);
+
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < timeoutMillis) {
+            if (lastResponseLine.contains(expectedKeyword)) {
+                return lastResponseLine;
+            }
+            try {
+                Thread.sleep(20); // Small delay to prevent busy waiting
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+        }
+        return null; // Timeout
     }
 
     public void restartServer() throws IOException, InterruptedException {
@@ -187,6 +225,33 @@ public class ServerRuntimeService {
 
                     break;
                 }
+            }
+        }
+    }
+
+    private void detectPlayerJoin(String line) {
+        if (line.contains("joined the game")) {
+            try {
+                String playerName = line.split("INFO]: ")[1].split(" joined")[0].trim();
+                logService.registerEntry(appConfig.getSystemUsrToken(), "Player " + playerName + " joined the game", LogEntryType.MINECRAFT);
+            } catch (Exception e) {
+                System.err.println("Error parsing join message: " + e.getMessage());
+            }
+        }
+    }
+
+
+    private void detectPlayerQuit(String line) {
+        if (line.contains("left the game")) {
+            try {
+                String playerName = line.split("INFO]: ")[1].split(" left")[0].trim();
+                logService.registerEntry(appConfig.getSystemUsrToken(), "Player " + playerName + " left the game", LogEntryType.MINECRAFT);
+
+                // Handle command interruptions
+                liveCommandService.handleLeftPlayer(playerName);
+
+            } catch (Exception e) {
+                System.err.println("Error parsing quit message: " + e.getMessage());
             }
         }
     }

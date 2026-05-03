@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class WorldDTO {
-    private String nombre;
+    private String name;
     private String seed;
     private String difficulty;
     private String gamemode;

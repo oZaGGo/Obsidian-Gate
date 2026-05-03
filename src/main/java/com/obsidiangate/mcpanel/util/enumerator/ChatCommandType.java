@@ -3,7 +3,8 @@ package com.obsidiangate.mcpanel.util.enumerator;
 public enum ChatCommandType {
     ECHO("echo"),
     INFO("info"),
-    ASK("ask");
+    ASK("ask"),
+    TPS("tps");
 
     private final String value;
 

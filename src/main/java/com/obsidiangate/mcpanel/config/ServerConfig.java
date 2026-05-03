@@ -39,7 +39,7 @@ public class ServerConfig {
             this.renderDistance = model.getRenderDistance();
             this.simulationDistance = model.getSimulationDistance();
             this.maxPlayers = model.getMaxPlayers();
-            this.serverPort = model.getRconPort();
+            this.serverPort = model.getServerPort();
         } else {
             // If bd is empty
             this.firstSetup = true;
