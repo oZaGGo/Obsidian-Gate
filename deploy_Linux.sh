@@ -27,7 +27,6 @@ while true; do
         echo -e "${GREEN}[SYSTEM] Closing app normally...${NC}"
         break
     else
-        echo -e "${YELLOW}[SYSTEM] Error (Code: $EXIT_CODE).${NC}"
-        break
+        echo -e "${YELLOW}[SYSTEM] Error (Code: $EXIT_CODE). Restarting...${NC}"
     fi
 done
