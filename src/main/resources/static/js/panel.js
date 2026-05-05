@@ -463,7 +463,7 @@ async function saveSettings() {
         renderDistance: parseInt(document.getElementById('set-render').value),
         simulationDistance: parseInt(document.getElementById('set-sim').value),
         maxPlayers: parseInt(document.getElementById('set-players').value),
-        rconPort: parseInt(document.getElementById('set-rcon').value)
+        serverPort: parseInt(document.getElementById('set-rcon').value)
     };
 
     try {
