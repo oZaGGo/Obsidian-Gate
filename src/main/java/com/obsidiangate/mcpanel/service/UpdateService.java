@@ -14,13 +14,16 @@ public class UpdateService {
 
     public boolean isUpdateAvailable() {
         try {
-            // Check remote branches
             osUtil.executeCommand("git fetch");
-            // Check local status against remote
-            String status = osUtil.executeCommand("git status -uno");
 
-            // If status is "is behind", origin contain new changes
-            return status.contains("is behind");
+            // Last commit id
+            String local = osUtil.executeCommand("git rev-parse HEAD").trim();
+
+            // Last commit id of the remote branch
+            String remote = osUtil.executeCommand("git rev-parse @{u}").trim();
+
+            // If local and remote commit ids are different, there is an update available
+            return !local.equals(remote);
         } catch (Exception e) {
             return false;
         }
