@@ -1222,7 +1222,7 @@ async function requestUpdate() {
     try {
         const response = await fetch('/api/version/update', {
             method: 'POST',
-            headers: { 'Authorization': localStorage.getItem('token') }
+            headers: { 'Authorization': localStorage.getItem('mc_token') }
         });
 
         if (response.ok) {
