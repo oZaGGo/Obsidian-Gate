@@ -10,5 +10,5 @@ public class ServerConfigDTO {
     private int renderDistance;
     private int simulationDistance;
     private int maxPlayers;
-    private int rconPort;
+    private int serverPort;
 }
