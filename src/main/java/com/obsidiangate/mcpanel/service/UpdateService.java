@@ -2,15 +2,18 @@ package com.obsidiangate.mcpanel.service;
 
 import com.obsidiangate.mcpanel.util.system.OSUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 @Service
 public class UpdateService {
 
     @Autowired
     private OSUtil osUtil;
+
+    @Autowired
+    private ApplicationContext context;
 
     public boolean isUpdateAvailable() {
         try {
@@ -33,7 +36,13 @@ public class UpdateService {
         new Thread(() -> {
             try {
                 Thread.sleep(2000);
+
+                System.out.println("[SYSTEM] Initiating shutdown with code 10...");
+
+                SpringApplication.exit(context, () -> 10);
+
                 System.exit(10); // This is for the deployment script
+
             } catch (Exception e) {
                 System.exit(1);
             }
