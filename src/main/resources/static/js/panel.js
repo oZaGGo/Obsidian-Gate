@@ -124,6 +124,8 @@ let online = false;
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    updatePanelVersion()
+
     checkSession();
 
     checkAdminPermissions();
@@ -1180,5 +1182,61 @@ async function saveSchedule() {
     } catch (error) {
         console.error("Save schedule error:", error);
         alert("Server error while saving schedule");
+    }
+}
+
+async function updatePanelVersion() {
+    try {
+        const response = await fetch('/api/version');
+        const data = await response.json();
+
+        const versionTag = document.querySelector('.version-tag');
+        if (versionTag) {
+            versionTag.textContent = `v${data.version}`;
+        }
+    } catch (error) {
+        console.error("No se pudo obtener la versión del sistema:", error);
+    }
+}
+
+async function checkSystemUpdate() {
+    try {
+        const response = await fetch('/api/version/check');
+        const data = await response.json();
+
+        const banner = document.getElementById('update-banner');
+        if (data.updateAvailable) {
+            banner.style.display = 'block';
+        } else {
+            banner.style.display = 'none';
+            alert("Your system is up to date!");
+        }
+    } catch (error) {
+        console.error("Error checking updates:", error);
+    }
+}
+
+async function requestUpdate() {
+    if (!confirm("You want to update the panel?")) return;
+
+    try {
+        const response = await fetch('/api/version/update', {
+            method: 'POST',
+            headers: { 'Authorization': localStorage.getItem('token') }
+        });
+
+        if (response.ok) {
+            document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background:#1a1a1a; color:white; flex-direction:column; font-family:sans-serif;'><h1>Updating System...</h1><p>Compiling and restarting, please wait.</p></div>";
+
+            // When the server became online again reload the page
+            setInterval(async () => {
+                try {
+                    const res = await fetch('/api/version');
+                    if (res.ok) window.location.reload();
+                } catch (e) {}
+            }, 10000);
+        }
+    } catch (error) {
+        alert("Error initiating update.");
     }
 }

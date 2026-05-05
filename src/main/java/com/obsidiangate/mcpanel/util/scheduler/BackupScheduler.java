@@ -70,7 +70,7 @@ public class BackupScheduler {
         try {
             // Check if another backup is already running to avoid overlaps
             if (worldManagementService.isBackupFinished()) {
-                worldManagementService.createBackup(world.getName(), null);
+                worldManagementService.createBackup(world.getName(), "");
                 logService.registerEntry(appConfig.getSystemUsrToken(),
                         "Scheduled backup started for world: " + world.getName(), LogEntryType.WORLDMANAGEMENT);
             } else {
