@@ -17,11 +17,8 @@
     padding: 30px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--accent);
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    margin-bottom: -25px;
 }
 
 .sidebar-menu {
@@ -148,19 +145,34 @@ h1 {
 }
 
 .logo-img {
-    width: 50px;
-    height: 50px;
+    width: 65px;
+    height: 65px;
     object-fit: contain;
 }
 
-.sidebar-logo {
-    padding: 20px;
+.title-img {
+    width: 170px;
+    height: 95px;
+    object-fit: contain;
+    filter: drop-shadow(0px 4px 6px rgb(0 0 0 / 0.68));
+    display: block;
+}
+.subtitle {
+    font-size: 0.5rem;
+    color: rgb(136 136 136);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-top: -20px;
+}
+
+.title-container {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--accent);
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    margin-left: 5px;
 }
 
 .credits {
