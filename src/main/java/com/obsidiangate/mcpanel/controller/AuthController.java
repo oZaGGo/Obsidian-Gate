@@ -114,6 +114,19 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
     }
+    @PostMapping("/password")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token, @RequestBody UserDTO user) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Unauthorized"));
+        }
+
+        try {
+            authService.changePassword(user, token);
+            return ResponseEntity.ok(Map.of("status", "ok", "message", "Password change successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        }
+    }
 
     @GetMapping("/admin")
     public ResponseEntity<Map<String, Boolean>> isAdmin(@RequestHeader("Authorization") String token) {
