@@ -776,6 +776,18 @@ async function loadUsers() {
                 actionsCell.appendChild(btnDelete);
             }
 
+            const btnChangePassword = document.createElement('button')
+            btnChangePassword.className = 'btn btn-filter active'
+            btnChangePassword.style = "margin-left: 8px;"
+
+            btnChangePassword.innerHTML = '<i class="fas fa-trash"></i> Change password'
+
+            btnChangePassword.onclick = async () => {
+                await openModal('changePassword', user.username.toString())
+            }
+
+            actionsCell.appendChild(btnChangePassword)
+
             userListBody.appendChild(row);
         });
 

@@ -102,7 +102,7 @@ public class AuthController {
     }
 
     @DeleteMapping("/user/{username}")
-    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token, @PathVariable String username) {
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         if (!authService.authenticate(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Unauthorized"));
         }
@@ -110,6 +110,19 @@ public class AuthController {
         try {
             authService.deleteManager(username, token);
             return ResponseEntity.ok(Map.of("status", "ok", "message", "User deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        }
+    }
+    @PostMapping("/password")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token, @RequestBody UserDTO user) {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Unauthorized"));
+        }
+
+        try {
+            authService.changePassword(user, token);
+            return ResponseEntity.ok(Map.of("status", "ok", "message", "Password change successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +41,9 @@ public class ServerRuntimeService {
 
     private long startTime = 0;
 
-    private volatile String lastResponseLine = "";
+    private volatile long totalLinesAdded = 0;
+
+    private final List<String> logBuffer = Collections.synchronizedList(new ArrayList<>());
 
     public void startServer() throws IOException {
         if (serverProcess != null && serverProcess.isAlive()) {
@@ -76,7 +79,13 @@ public class ServerRuntimeService {
                 String line;
                 while ((line = reader.readLine()) != null) {
 
-                    this.lastResponseLine = line;
+                    if (line != null) {
+                        synchronized (logBuffer) {
+                            logBuffer.add(line);
+                            totalLinesAdded++;
+                            if (logBuffer.size() > 500) logBuffer.remove(0);
+                        }
+                    }
 
                     detectPlayerJoin(line);
                     detectPlayerQuit(line);
@@ -141,17 +150,31 @@ public class ServerRuntimeService {
     public String sendCommandWithResponse(String command, String expectedKeyword, long timeoutMillis) {
         if (!isRunning()) return null;
 
-        this.lastResponseLine = "";
-
+        long startLineCount = totalLinesAdded; // Cuántas líneas había antes de enviar
         sendCommand(command);
 
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < timeoutMillis) {
-            if (lastResponseLine.contains(expectedKeyword)) {
-                return lastResponseLine;
+            long currentLineCount = totalLinesAdded;
+
+            if (currentLineCount > startLineCount) {
+                int linesToCheck = (int) (currentLineCount - startLineCount);
+
+                synchronized (logBuffer) {
+                    int size = logBuffer.size();
+                    int startIdx = Math.max(0, size - linesToCheck);
+
+                    for (int i = startIdx; i < size; i++) {
+                        String line = logBuffer.get(i);
+                        if (line.contains(expectedKeyword)) {
+                            return line;
+                        }
+                    }
+                }
             }
+
             try {
-                Thread.sleep(20); // Small delay to prevent busy waiting
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return null;
@@ -221,7 +244,10 @@ public class ServerRuntimeService {
 
                     // "this" is used to maintain the process reference and service access for command execution
 
-                    liveCommandService.execute(command, playerName, args, this);
+                    final String finalArgs = args;
+                    new Thread(() -> {
+                        liveCommandService.execute(command, playerName, finalArgs, this);
+                    }).start();
 
                     break;
                 }

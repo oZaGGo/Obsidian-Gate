@@ -4,7 +4,9 @@ public enum ChatCommandType {
     ECHO("echo"),
     INFO("info"),
     ASK("ask"),
-    TPS("tps");
+    TPS("tps"),
+    COORDS("coords"),
+    BACKUP("backup");
 
     private final String value;
 

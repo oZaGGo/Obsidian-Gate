@@ -142,6 +142,21 @@ public class AuthService {
         userRepository.delete(user);
     }
 
+    public void changePassword(UserDTO user, String token) {
+
+        UserAuth userAuth = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!isAdmin(token)) {
+            throw new RuntimeException("Not authorized to change this user's password");
+        }
+
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        userAuth.setPassword(encodedPassword);
+
+        userRepository.save(userAuth);
+    }
+
     public boolean isAdmin(String token){
         Optional<UserAuth> author = userRepository.findByToken(token);
         return author.map(UserAuth::isAdmin).orElse(false);

@@ -1,0 +1,92 @@
+/* --- Estructura del Modal (Dialog) --- */
+#dynamicModal {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color, #2d2f3f);
+    border-radius: 12px;
+    padding: 25px;
+    width: 400px;
+    color: white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+#dynamicModal::backdrop {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+/* --- Elementos Internos --- */
+.modal-title {
+    color: var(--accent);
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.modal-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    display: block;
+}
+
+.modal-subtitle strong {
+    color: white;
+}
+
+/* --- Formulario --- */
+.modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.modal-field label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+.modal-field input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 12px;
+    color: white;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.modal-field input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* --- Footer --- */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+/* El botón de cancelar usa tu estilo de filtro */
+.modal-footer .btn-cancel {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modal-footer .btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.modal-header{display: none}

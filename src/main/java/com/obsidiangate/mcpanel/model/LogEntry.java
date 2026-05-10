@@ -3,6 +3,9 @@ package com.obsidiangate.mcpanel.model;
 import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,6 +21,7 @@ public class LogEntry {
     private LogEntryType type;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserAuth author;
 

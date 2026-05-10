@@ -18,27 +18,35 @@ public class ServerConfigModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int maxGbRam = 2;
+    private Integer maxGbRam = 2;
 
+    @Builder.Default
     @Column(nullable = false, length = 100)
     private String name = "Minecraft Server";
 
+    @Builder.Default
     @Column(nullable = false, length = 500)
     private String description = "Server managed by ObsidianGate";
 
+    @Builder.Default
     @Column(nullable = false)
-    private int renderDistance = 16;
+    private Integer renderDistance = 16;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int simulationDistance = 10;
+    private Integer simulationDistance = 10;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int maxPlayers = 20;
+    private Integer maxPlayers = 20;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int serverPort = 25565;
+    private Integer serverPort = 25565;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean firstSetup = true;
 }
