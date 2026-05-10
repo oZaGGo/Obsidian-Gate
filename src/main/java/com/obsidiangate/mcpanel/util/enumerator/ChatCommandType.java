@@ -5,7 +5,8 @@ public enum ChatCommandType {
     INFO("info"),
     ASK("ask"),
     TPS("tps"),
-    COORDS("coords");
+    COORDS("coords"),
+    BACKUP("backup");
 
     private final String value;
 

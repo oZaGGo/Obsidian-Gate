@@ -10,6 +10,7 @@ import com.obsidiangate.mcpanel.util.ai.AIChat;
 import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
 import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +38,10 @@ public class LiveCommandService {
 
     @Autowired
     private UserCoordsRepository userCoordsRepository;
+
+    @Autowired
+    @Lazy
+    private WorldManagementService worldManagementService;
 
     // Safe threads
     private final Map<String, Boolean> userMetricsBroadcastStatus = new ConcurrentHashMap<>();
@@ -154,6 +159,26 @@ public class LiveCommandService {
                     case "list" -> handleListCoords(playerName, currentWorld, runtimeService);
                     default -> runtimeService.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .coords <new | del | list>\",\"color\":\"red\"}");
                 }
+            }
+            case BACKUP -> {
+                String backupAlias = args.trim();
+
+                if (backupAlias.isEmpty()) {
+                    runtimeService.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .backup [alias]\",\"color\":\"red\"}");
+                    return;
+                }
+
+                World currentWorld = worldRepository.findCurrentWorld().orElse(null);
+
+                if (currentWorld == null) {
+                    runtimeService.sendCommand("tellraw " + playerName + " {\"text\":\"[Error] Cannot find active world.\",\"color\":\"red\"}");
+                    return;
+                }else {
+                    logService.registerEntry(appConfig.getSystemUsrToken(), "Player " + playerName + " used .backup", LogEntryType.MINECRAFT);
+                    runtimeService.sendCommand("say [Live] Backup process started by " + playerName);
+                }
+
+                worldManagementService.createBackup(currentWorld.getName(), backupAlias);
             }
         }
     }
@@ -276,9 +301,11 @@ public class LiveCommandService {
 
     private void handleNewCoord(String playerName, String alias, World world, ServerRuntimeService runtime) {
         if (alias.isEmpty()) {
-            runtime.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .coords new <alias>\",\"color\":\"red\"}");
+            runtime.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .coords new [alias]\",\"color\":\"red\"}");
             return;
         }
+
+        logService.registerEntry(appConfig.getSystemUsrToken(), "Player " + playerName + " used .coords new", LogEntryType.MINECRAFT);
 
         CompletableFuture<String> dimFuture = CompletableFuture.supplyAsync(() -> fetchPlayerDimension(playerName, runtime));
         CompletableFuture<String> posFuture = CompletableFuture.supplyAsync(() -> fetchPlayerPosition(playerName, runtime));
@@ -309,6 +336,11 @@ public class LiveCommandService {
     }
 
     private void handleDelCoord(String playerName, String alias, World world, ServerRuntimeService runtime) {
+        if (alias.isEmpty()) {
+            runtime.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .coords del [alias]\",\"color\":\"red\"}");
+            return;
+        }
+        logService.registerEntry(appConfig.getSystemUsrToken(), "Player " + playerName + " used .coords del", LogEntryType.MINECRAFT);
         userCoordsRepository.deleteByPlayerNameAndWorldAndAlias(playerName, world, alias);
         runtime.sendCommand(String.format("tellraw %s {\"text\":\"[Coords] Deleted: %s\",\"color\":\"yellow\"}", playerName, alias));
     }
@@ -318,8 +350,9 @@ public class LiveCommandService {
         List<UserCoords> coords = userCoordsRepository.findByPlayerNameAndWorldAndDimension(playerName, world, currentDim);
 
         if (coords.isEmpty()) {
-            runtime.sendCommand(String.format("tellraw %s {\"text\":\"No hay coordenadas registradas.\",\"color\":\"gray\"}", playerName));
+            runtime.sendCommand(String.format("tellraw %s {\"text\":\"Coords not registered.\",\"color\":\"gray\"}", playerName));
         } else {
+            logService.registerEntry(appConfig.getSystemUsrToken(), "Player " + playerName + " used .coords list", LogEntryType.MINECRAFT);
             runtime.sendCommand(String.format("tellraw %s {\"text\":\"--- %s (%s) ---\",\"color\":\"aqua\"}", playerName, currentDim, world.getName()));
             for (UserCoords c : coords) {
                 String alias = c.getAlias();
@@ -333,6 +366,7 @@ public class LiveCommandService {
                 );
 
                 runtime.sendCommand("tellraw " + playerName + " " + tellrawJson);
+                runtime.sendCommand("tellraw " + playerName + " "); // Empty line for spacing
             }
         }
     }
