@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -40,13 +41,33 @@ public class ServerConfigService {
             current = new ServerConfigModel();
         }
 
-        current.setName(dto.getName());
-        current.setDescription(dto.getDescription());
-        current.setMaxGbRam(dto.getMaxGbRam());
-        current.setRenderDistance(dto.getRenderDistance());
-        current.setSimulationDistance(dto.getSimulationDistance());
-        current.setMaxPlayers(dto.getMaxPlayers());
-        current.setServerPort(dto.getServerPort());
+        if (dto.getName() != null) {
+            current.setName(dto.getName());
+        }
+
+        if (dto.getDescription() != null) {
+            current.setDescription(dto.getDescription());
+        }
+
+        if (dto.getMaxGbRam() != null) {
+            current.setMaxGbRam(dto.getMaxGbRam());
+        }
+
+        if (dto.getRenderDistance() != null) {
+            current.setRenderDistance(dto.getRenderDistance());
+        }
+
+        if (dto.getSimulationDistance() != null) {
+            current.setSimulationDistance(dto.getSimulationDistance());
+        }
+
+        if (dto.getMaxPlayers() != null) {
+            current.setMaxPlayers(dto.getMaxPlayers());
+        }
+
+        if (dto.getServerPort() != null) {
+            current.setServerPort(dto.getServerPort());
+        }
 
         repository.save(current);
         serverConfigInApp.refresh();
