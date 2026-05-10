@@ -2,13 +2,19 @@ package com.obsidiangate.mcpanel.service;
 
 import com.obsidiangate.mcpanel.config.AppConfig;
 import com.obsidiangate.mcpanel.dto.SystemMetricsDTO;
+import com.obsidiangate.mcpanel.model.UserCoords;
+import com.obsidiangate.mcpanel.model.World;
+import com.obsidiangate.mcpanel.repository.UserCoordsRepository;
+import com.obsidiangate.mcpanel.repository.WorldRepository;
 import com.obsidiangate.mcpanel.util.ai.AIChat;
 import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
 import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -25,6 +31,12 @@ public class LiveCommandService {
 
     @Autowired
     private AIChat aiChat;
+
+    @Autowired
+    private WorldRepository worldRepository;
+
+    @Autowired
+    private UserCoordsRepository userCoordsRepository;
 
     // Safe threads
     private final Map<String, Boolean> userMetricsBroadcastStatus = new ConcurrentHashMap<>();
@@ -124,8 +136,29 @@ public class LiveCommandService {
                     runtimeService.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .tps <start> | <stop>\",\"color\":\"red\"}");
                 }
             }
+            case COORDS -> {
+                String[] parts = args.split(" ", 2);
+                String subCommand = (parts.length > 0) ? parts[0].toLowerCase() : "";
+                String extraArgs = (parts.length > 1) ? parts[1] : "";
+
+                World currentWorld = worldRepository.findCurrentWorld().orElse(null);
+
+                if (currentWorld == null) {
+                    runtimeService.sendCommand("tellraw " + playerName + " {\"text\":\"[Error] Cannot find active world.\",\"color\":\"red\"}");
+                    return;
+                }
+
+                switch (subCommand) {
+                    case "new" -> handleNewCoord(playerName, extraArgs, currentWorld, runtimeService);
+                    case "del" -> handleDelCoord(playerName, extraArgs, currentWorld, runtimeService);
+                    case "list" -> handleListCoords(playerName, currentWorld, runtimeService);
+                    default -> runtimeService.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .coords <new | del | list>\",\"color\":\"red\"}");
+                }
+            }
         }
     }
+
+    // Sub process for handling loop commands like .info and .tps without blocking main thread
 
     private void startSubProcess(ServerRuntimeService service) {
         new Thread(() -> {
@@ -136,7 +169,7 @@ public class LiveCommandService {
                         userMetricsInfo(service);
                         tpsInfo(service);
                     }
-                    Thread.sleep(3000); // Every second
+                    Thread.sleep(3000); // Every 3 seconds
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
@@ -144,6 +177,8 @@ public class LiveCommandService {
             }
         }).start();
     }
+
+    // Metrics info for players with active broadcast, every 3 seconds, in format: [Metrics] CPU: 15.5% | RAM: 3.2/8.0 GB
 
     private void userMetricsInfo(ServerRuntimeService service) {
         SystemMetricsDTO metrics = metricsService.getSystemMetrics();
@@ -163,6 +198,8 @@ public class LiveCommandService {
             }
         });
     }
+
+    // Tps info for players with active tps calculation, every 3 seconds, in format: [Metrics] TPS: 19.95 (PERFECT) with color green, yellow or red based on tps value
 
     private void tpsInfo(ServerRuntimeService service) {
         userTpsCalcStatus.forEach((playerName, active) -> {
@@ -234,4 +271,117 @@ public class LiveCommandService {
         }
         return 0;
     }
+
+    // Handlers for .coords subcommands
+
+    private void handleNewCoord(String playerName, String alias, World world, ServerRuntimeService runtime) {
+        if (alias.isEmpty()) {
+            runtime.sendCommand("tellraw " + playerName + " {\"text\":\"Usage: .coords new <alias>\",\"color\":\"red\"}");
+            return;
+        }
+
+        CompletableFuture<String> dimFuture = CompletableFuture.supplyAsync(() -> fetchPlayerDimension(playerName, runtime));
+        CompletableFuture<String> posFuture = CompletableFuture.supplyAsync(() -> fetchPlayerPosition(playerName, runtime));
+
+        CompletableFuture.allOf(dimFuture, posFuture).thenAccept(v -> {
+            String dim = dimFuture.join();
+            String pos = posFuture.join();
+
+            if (dim != null && pos != null) {
+                UserCoords coord = UserCoords.builder()
+                        .playerName(playerName)
+                        .alias(alias)
+                        .coordinates(pos)
+                        .dimension(dim)
+                        .world(world)
+                        .build();
+
+                userCoordsRepository.save(coord);
+                runtime.sendCommand(String.format("tellraw %s {\"text\":\"[Coords] '%s' saved en %s.\",\"color\":\"green\"}", playerName, alias, dim));
+            } else {
+                runtime.sendCommand(String.format("tellraw %s {\"text\":\"[Error] Timed out fetching data (Dim: %s, Pos: %s)\",\"color\":\"red\"}",
+                        playerName, (dim != null ? "OK" : "NULL"), (pos != null ? "OK" : "NULL")));
+            }
+        }).exceptionally(ex -> {
+            runtime.sendCommand("tellraw " + playerName + " {\"text\":\"[Error] Internal async error.\",\"color\":\"red\"}");
+            return null;
+        });
+    }
+
+    private void handleDelCoord(String playerName, String alias, World world, ServerRuntimeService runtime) {
+        userCoordsRepository.deleteByPlayerNameAndWorldAndAlias(playerName, world, alias);
+        runtime.sendCommand(String.format("tellraw %s {\"text\":\"[Coords] Deleted: %s\",\"color\":\"yellow\"}", playerName, alias));
+    }
+
+    private void handleListCoords(String playerName, World world, ServerRuntimeService runtime) {
+        String currentDim = fetchPlayerDimension(playerName, runtime);
+        List<UserCoords> coords = userCoordsRepository.findByPlayerNameAndWorldAndDimension(playerName, world, currentDim);
+
+        if (coords.isEmpty()) {
+            runtime.sendCommand(String.format("tellraw %s {\"text\":\"No hay coordenadas registradas.\",\"color\":\"gray\"}", playerName));
+        } else {
+            runtime.sendCommand(String.format("tellraw %s {\"text\":\"--- %s (%s) ---\",\"color\":\"aqua\"}", playerName, currentDim, world.getName()));
+            for (UserCoords c : coords) {
+                String alias = c.getAlias();
+                String coordStr = c.getCoordinates();
+
+                String tellrawJson = String.format(
+                        "[\"\",{\"text\":\"• %s: \",\"color\":\"white\"}," +
+                                "{\"text\":\"%s\",\"color\":\"yellow\",\"underlined\":true," +
+                                "\"clickEvent\":{\"action\":\"copy_to_clipboard\",\"value\":\"%s\"}}]",
+                        alias, coordStr, coordStr
+                );
+
+                runtime.sendCommand("tellraw " + playerName + " " + tellrawJson);
+            }
+        }
+    }
+
+    // Helpers for fetching player dimension and position using Minecraft commands
+
+    private String fetchPlayerDimension(String playerName, ServerRuntimeService runtime) {
+        String res = runtime.sendCommandWithResponse("data get entity " + playerName + " Dimension", "data: \"minecraft:", 3000);
+        return (res != null) ? parseDimension(res) : null;
+    }
+
+    private String fetchPlayerPosition(String playerName, ServerRuntimeService runtime) {
+        String res = runtime.sendCommandWithResponse("data get entity " + playerName + " Pos", "data: [", 3000);
+        return (res != null) ? parseCoords(res) : null;
+    }
+
+    // Parsers
+
+    private String parseDimension(String logLine) {
+        try {
+            if (logLine.contains("overworld")) return "OVERWORLD";
+            if (logLine.contains("the_nether")) return "NETHER";
+            if (logLine.contains("the_end")) return "END";
+
+            String data = logLine.split("data: ")[1].replace("\"", "").trim();
+            if (data.contains(":")) return data.split(":")[1].toUpperCase();
+            return data.toUpperCase();
+        } catch (Exception e) {
+            return "OVERWORLD";
+        }
+    }
+
+    private String parseCoords(String logLine) {
+        try {
+            int startIndex = logLine.indexOf("data: [");
+            if (startIndex == -1) return null;
+
+            String rawData = logLine.substring(startIndex + 6, logLine.indexOf("]", startIndex) + 1);
+            String cleanData = rawData.replace("[", "").replace("]", "");
+            String[] parts = cleanData.split(",");
+
+            double x = Double.parseDouble(parts[0].replaceAll("[^0-9.-]", "").trim());
+            double y = Double.parseDouble(parts[1].replaceAll("[^0-9.-]", "").trim());
+            double z = Double.parseDouble(parts[2].replaceAll("[^0-9.-]", "").trim());
+
+            return String.format("X: %.1f, Y: %.1f, Z: %.1f", x, y, z);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

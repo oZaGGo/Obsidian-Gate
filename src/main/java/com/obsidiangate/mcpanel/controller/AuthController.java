@@ -102,7 +102,7 @@ public class AuthController {
     }
 
     @DeleteMapping("/user/{username}")
-    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token, @PathVariable String username) {
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         if (!authService.authenticate(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Unauthorized"));
         }
