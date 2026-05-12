@@ -783,7 +783,7 @@ async function loadUsers() {
             btnChangePassword.innerHTML = '<i class="fas fa-trash"></i> Change password'
 
             btnChangePassword.onclick = async () => {
-                await openModal('changePassword', user.username.toString())
+                await openModal('changePassword', { username: user.username.toString()})
             }
 
             actionsCell.appendChild(btnChangePassword)

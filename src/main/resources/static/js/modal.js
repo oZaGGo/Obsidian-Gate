@@ -1,4 +1,4 @@
-async function openModal(templateName, selectedUsername) {
+async function openModal(templateName, parameters = {}) {
     const dialog = document.getElementById('dynamicModal')
     const modalContent = document.getElementById('modalContent')
 
@@ -19,26 +19,32 @@ async function openModal(templateName, selectedUsername) {
         modalContent.innerHTML = `
             <div class="error-view">
                 <h2>Error 404</h2>
-                <p>Section not available: ${templateName}</p>
+                <p>Error loading fields.</p>
             </div>`
     }
 
-    const userName = document.getElementById("userSelected")
-    userName.innerText = selectedUsername
+    await initModalStructure(templateName, dialog, parameters)
 
-    // Open the dialog
-    dialog.showModal()
-
-    const changeBtn = document.getElementById('btnChangePassword')
-    if (changeBtn) {
-        changeBtn.onclick = () => changePassword(selectedUsername)
-    }
-
-    // Connect close button
     const closeBtn = document.getElementById('closeDynamicModal')
     if (closeBtn) {
         closeBtn.onclick = () => dialog.close()
     }
+}
+
+async function initModalStructure(templateName, dialog, parameters) {
+
+    if (templateName=='changePassword') {
+        const userName = document.getElementById("userSelected")
+        userName.innerText = parameters.username
+
+        dialog.showModal()
+
+        const changeBtn = document.getElementById('btnChangePassword')
+        if (changeBtn) {
+            changeBtn.onclick = () => changePassword(parameters.username)
+        }
+    }
+
 }
 
 async function changePassword(username) {

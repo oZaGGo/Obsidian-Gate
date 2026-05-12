@@ -1,0 +1,135 @@
+#welcomeTitle {
+    font-size: 5rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 0.9;
+    letter-spacing: -3px;
+    color: #ffffff;
+    margin-right: 20px;
+    background: linear-gradient(to bottom, #ffffff, #888888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.title-img {
+    height: 110px;
+    width: auto;
+    margin-top: 10px;
+    filter: drop-shadow(0 0 25px rgba(125, 95, 255, 0.4));
+    transition: transform 0.3s ease;
+}
+
+.title-img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 35px rgba(125, 95, 255, 0.6));
+}
+
+.header-section .text-secondary {
+    font-size: 1.4rem;
+    opacity: 0.8;
+    margin-top: 10px;
+}
+
+/* Portal animation */
+
+#portal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.portal-core {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle,
+        rgba(125, 95, 255, 0.8) 0%,
+        rgba(48, 10, 84, 0.9) 40%,
+        #000 80%);
+    box-shadow: inset 0 0 100px #7d5fff;
+    animation: portalEntrance 4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+@keyframes portalEntrance {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+        filter: blur(15px);
+    }
+    20% {
+        transform: scale(0.5);
+    }
+    75% {
+        transform: scale(0.8);
+        filter: blur(5px);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(5);
+        opacity: 0;
+        filter: blur(0);
+    }
+}
+
+.panel-layout {
+    animation: contentReveal 1.5s ease-out 3.2s forwards; /* 3.2s de retraso */
+    opacity: 0;
+}
+
+@keyframes contentReveal {
+    0% { opacity: 0; transform: scale(0.95); filter: brightness(0.5); }
+    60% { opacity: 0.5; }
+    100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+/* Enter action */
+
+#entry-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    transition: opacity 0.8s ease;
+}
+
+.entry-logo {
+    height: 60px;
+    margin-bottom: 40px;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+}
+
+#enter-btn {
+    background: transparent;
+    color: #7d5fff;
+    border: 2px solid #7d5fff;
+    padding: 18px 50px;
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(125, 95, 255, 0.1);
+}
+
+#enter-btn:hover {
+    background: #7d5fff;
+    color: white;
+    box-shadow: 0 0 40px rgba(125, 95, 255, 0.5);
+    transform: scale(1.05);
+}

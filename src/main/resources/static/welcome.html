@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObsidianGate - Panel</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/welcome/welcome.css">
+</head>
+<body>
+<div id="entry-screen">
+    <div class="entry-content text-center">
+        <button id="enter-btn" onclick="initPortal()">ENTER GATE</button>
+    </div>
+</div>
+
+<div id="portal-overlay" style="display: none;">
+    <div class="portal-core"></div>
+</div>
+
+<div class="panel-layout" style="display: none;">
+    <div class="fade-in settings-container">
+        <div class="header-section text-center">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                <h1 id="welcomeTitle">Welcome to </h1>
+                <img src="image/title.png" alt="ObsidianGate" class="title-img">
+            </div>
+            <p class="text-secondary">Let's set up your Minecraft server to get started.</p>
+        </div>
+    </div>
+</div>
+
+<audio id="portal-sound" src="audio/netherPortal.mp3" preload="auto"></audio>
+<audio id="portal-sound-loaded" src="audio/netherPortalLoaded.mp3" preload="auto"></audio>
+<script src="js/welcome.js"></script>
+</body>
+</html>
