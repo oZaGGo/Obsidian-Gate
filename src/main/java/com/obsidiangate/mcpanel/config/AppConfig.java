@@ -15,4 +15,5 @@ public class AppConfig {
     private String aiToken = "api-token-here";
     private String systemUsrToken = "system-user-token-here";
     private String backupTime = "12h";
+    private String serverLimitVersion = "26.1.3";
 }

@@ -29,4 +29,7 @@ public class UserAuth {
     @Column(nullable = false)
     private boolean isAdmin;
 
+    @Column(nullable = false)
+    private boolean setupCompleted;
+
 }

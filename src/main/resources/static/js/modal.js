@@ -72,7 +72,7 @@ async function changePassword(username) {
                 'Content-Type': 'application/json',
                 'Authorization': localStorage.getItem('mc_token')
             },
-            body: JSON.stringify({ username, password, isAdmin: false })
+            body: JSON.stringify({ username, password, isAdmin: false, setupCompleted: true })
         });
 
         const data = await response.json()
@@ -85,7 +85,7 @@ async function changePassword(username) {
         }
     } catch (e) {
         console.error("Error:", e)
-        alert("Connection error")
+        alert("Connection error.")
     }
 
 }

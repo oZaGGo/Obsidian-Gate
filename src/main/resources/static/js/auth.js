@@ -5,7 +5,7 @@ async function login(username, password) {
         const response = await fetch(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, isAdmin: true })
+            body: JSON.stringify({ username, password, isAdmin: true, setupCompleted: true })
         });
 
         const data = await response.json();
@@ -27,13 +27,15 @@ async function register(username, password) {
         const response = await fetch(`${API_BASE}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, isAdmin: true })
+            body: JSON.stringify({ username, password, isAdmin: true, setupCompleted: true })
         });
 
         const data = await response.json();
 
         if (response.ok && data.status === "ok") {
-            window.location.href = "../index.html";
+            localStorage.setItem('mc_token', data.token);
+            localStorage.setItem('mc_user', username);
+            window.location.href = "../welcome.html";
         } else {
             alert(data.message || "Registration failed");
         }

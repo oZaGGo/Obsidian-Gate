@@ -80,3 +80,53 @@ function renderVersions(versions) {
         select.appendChild(option);
     });
 }
+
+// Initialize config
+
+async function startInitialConfig() {
+    const versionSelect = document.getElementById('version-select');
+    const geminiInput = document.getElementById('gemini-api-key');
+    const startBtn = document.querySelector('.start-config-btn');
+
+    if (!versionSelect.value) {
+        alert("Please select a target version for the portal.");
+        return;
+    }
+
+    startBtn.disabled = true;
+    startBtn.innerHTML = "SYNCING PORTAL...";
+    startBtn.style.boxShadow = "0 0 30px rgba(125, 95, 255, 0.8)";
+
+    const payload = {
+        version: versionSelect.value,
+        geminiApiKey: geminiInput.value
+    };
+
+    try {
+        const response = await fetch('/api/welcome/start-config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('mc_token')
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log("Success:", data.message);
+            document.querySelector('.settings-container').style.opacity = "0";
+            setTimeout(() => {
+                window.location.href = "../view/panel.html";
+            }, 1000);
+        } else {
+            throw new Error(data.message || "Portal error");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to start configuration: " + error.message);
+        startBtn.disabled = false;
+        startBtn.innerHTML = "START CONFIGURATION";
+    }
+}

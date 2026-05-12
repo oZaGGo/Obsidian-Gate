@@ -1,5 +1,6 @@
 package com.obsidiangate.mcpanel.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.List;
@@ -9,9 +10,12 @@ import java.util.stream.Collectors;
 @Service
 public class WelcomeService {
 
+    @Autowired
+    private InitConfigService initConfigService;
+
     private final String MOJANG_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String limit = "26.1.2";
+    private final String limit = "26.1.3";
 
     public List<String> getAvailableVersions() {
         try {
@@ -57,5 +61,9 @@ public class WelcomeService {
         } catch (NumberFormatException e) {
             return 0;
         }
+    }
+
+    public void setupServer(String version, String geminiApiKey, String token) {
+        initConfigService.initConfig(version, geminiApiKey, token);
     }
 }

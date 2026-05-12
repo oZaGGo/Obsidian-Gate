@@ -62,7 +62,7 @@ public class ApplicationReadyListener {
             System.out.println("\n[First Setup] Creating SYSTEM user...");
             createSystemUser();
             System.out.println("\n[First Setup] Creating default world...");
-            createDefaultWorld();
+            //createDefaultWorld();
             appConfig.setFirstSetup(false);
             // Save initial config
             saveConfig();
@@ -115,6 +115,7 @@ public class ApplicationReadyListener {
                 appConfig.setAiToken(loadedConfig.getAiToken());
                 appConfig.setSystemUsrToken(loadedConfig.getSystemUsrToken());
                 appConfig.setBackupTime(loadedConfig.getBackupTime());
+                appConfig.setServerLimitVersion(loadedConfig.getServerLimitVersion());
 
                 System.out.println("[Config] server-config.json loaded successfully.");
             } else {
@@ -135,7 +136,7 @@ public class ApplicationReadyListener {
     }
 
     @PreDestroy
-    private void saveConfig(){
+    public void saveConfig(){
         File file = new File(CONFIG_FILE);
         try {
             if (file.exists()) {

@@ -822,7 +822,7 @@ async function createNewManager() {
                 'Content-Type': 'application/json',
                 'Authorization': localStorage.getItem('mc_token')
             },
-            body: JSON.stringify({ username, password, isAdmin: isAdmin })
+            body: JSON.stringify({ username, password, isAdmin: isAdmin, setupCompleted: true })
         });
 
         const data = await response.json();

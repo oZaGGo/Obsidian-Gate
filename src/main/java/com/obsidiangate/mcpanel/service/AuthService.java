@@ -48,7 +48,7 @@ public class AuthService {
             UserAuth user = userOpt.get();
             // Check if the token is still valid based on last connection time and authTimeMins
             long minutesSinceLastConn = Duration.between(user.getLastConn(), LocalDateTime.now()).toMinutes();
-            if (minutesSinceLastConn <= appConfig.getAuthTimeMins()) {
+            if ((minutesSinceLastConn <= appConfig.getAuthTimeMins()) && user.isSetupCompleted()) {
                 return true;
             }
         }
@@ -70,6 +70,7 @@ public class AuthService {
         user.setToken(UUID.randomUUID().toString());
         user.setLastConn(LocalDateTime.now());
         user.setAdmin(true);
+        user.setSetupCompleted(false);
 
         userRepository.save(user);
 
@@ -121,6 +122,7 @@ public class AuthService {
         user.setAdmin(userDto.isAdmin());
         user.setToken(UUID.randomUUID().toString());
         user.setLastConn(LocalDateTime.now());
+        user.setSetupCompleted(true);
 
         userRepository.save(user);
 
