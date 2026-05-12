@@ -5,8 +5,9 @@ function initPortal() {
     const panel = document.querySelector('.panel-layout');
     const sound = document.getElementById('portal-sound');
     const soundLoaded = document.getElementById('portal-sound-loaded');
+    sound.volume = 0.3;
+    soundLoaded.volume = 0.3;
 
-    sound.volume = 0.5;
     sound.play();
 
     portal.style.display = 'block';
