@@ -45,7 +45,19 @@ async function initModalStructure(templateName, dialog, parameters) {
         }
     }
 
+    if (templateName=='acceptEula') {
+
+        dialog.showModal()
+
+        const acceptEulaBtn = document.getElementById('btnAcceptEula')
+        if (acceptEulaBtn) {
+            acceptEulaBtn.onclick = () => alert("Thank you for accepting the EULA. You can now use the application.")
+        }
+    }
+
 }
+
+
 
 async function changePassword(username) {
     const passwordInput = document.getElementById('newPassword') || document.querySelector('input[type="password"]')
@@ -86,6 +98,29 @@ async function changePassword(username) {
     } catch (e) {
         console.error("Error:", e)
         alert("Connection error.")
+    }
+
+    async function acceptEula() {
+        try {
+            const response = await fetch(`${API_BASE}/eula/accept`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': localStorage.getItem('mc_token')
+                }
+            });
+
+            const data = await response.json()
+
+            if (response.ok) {
+                alert(data.message || "EULA accepted successfully")
+                document.getElementById('dynamicModal').close()
+            } else {
+                alert(data.message || "Error accepting EULA")
+            }
+        } catch (e) {
+            console.error("Error:", e)
+            alert("Connection error.")
+        }
     }
 
 }

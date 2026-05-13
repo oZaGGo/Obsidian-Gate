@@ -1,5 +1,6 @@
 package com.obsidiangate.mcpanel.controller;
 
+import com.obsidiangate.mcpanel.config.ServerConfig;
 import com.obsidiangate.mcpanel.service.AuthService;
 import com.obsidiangate.mcpanel.service.LogService;
 import com.obsidiangate.mcpanel.service.ServerRuntimeService;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +26,8 @@ public class ServerRuntimeController {
 
     @Autowired
     private AuthService authService;
+    @Autowired
+    private ServerConfig serverConfig;
 
     @PostMapping("/control")
     public ResponseEntity<?> controlServer(
@@ -89,7 +93,21 @@ public class ServerRuntimeController {
         }
 
         List<String> logs = serverService.getLogs();
-        return ResponseEntity.ok(logs);
+
+        return ResponseEntity.ok(Map.of("logs", logs, "eula", serverConfig.isEula()));
+    }
+
+    @GetMapping("acceptEula")
+    public ResponseEntity<?> acceptEula(@RequestHeader("Authorization") String token) throws IOException, InterruptedException {
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        serverService.acceptEula();
+
+        serverService.restartServer();
+
+        return ResponseEntity.ok(Map.of("message", "EULA accepted"));
     }
 
     @GetMapping("/status")

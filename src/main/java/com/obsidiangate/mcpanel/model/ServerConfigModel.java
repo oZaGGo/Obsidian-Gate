@@ -49,4 +49,9 @@ public class ServerConfigModel {
     @Builder.Default
     @Column(nullable = false)
     private boolean firstSetup = true;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean eula = false;
+
 }

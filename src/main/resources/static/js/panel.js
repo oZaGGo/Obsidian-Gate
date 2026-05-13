@@ -257,7 +257,11 @@ async function refreshLogs() {
         const response = await fetch('/api/server/logs', {
             headers: { 'Authorization': localStorage.getItem('mc_token') }
         });
-        const logs = await response.json();
+        const {logs, eula} = await response.json();
+
+        if(eula){
+            await openModal('acceptEula');
+        }
 
         consoleOutput.innerHTML = logs.map(line => {
             let color = "#ccc";

@@ -90,6 +90,10 @@ public class ServerRuntimeService {
                     detectPlayerJoin(line);
                     detectPlayerQuit(line);
 
+                    if(!serverConfig.isEula()) {
+                        detectEula(line);
+                    }
+
                     String cleanLine = sanitizeLogLine(line);
 
                     synchronized (consoleLogs) {
@@ -280,5 +284,18 @@ public class ServerRuntimeService {
                 System.err.println("Error parsing quit message: " + e.getMessage());
             }
         }
+    }
+
+    private void detectEula(String line) {
+        if (!line.contains("You need to agree to the EULA")) {
+            serverConfig.setEula(true);
+        }else{
+            serverConfig.setEula(false);
+        }
+
+    }
+
+    public void acceptEula(){
+        serverConfig.setEula(true);
     }
 }
