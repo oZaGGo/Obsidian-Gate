@@ -16,6 +16,10 @@
 *.iws
 *.ipr
 
+#Node.js
+node_modules/
+node/
+
 # Package Files #
 *.jar
 *.war
