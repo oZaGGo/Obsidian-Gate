@@ -41,6 +41,12 @@
 <script src="../js/auth.js"></script>
 
 <script>
+    const token = localStorage.getItem('mc_token');
+
+    if (token) {
+        window.location.href = '../welcome.html';
+    }
+
     document.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleRegister();
     });

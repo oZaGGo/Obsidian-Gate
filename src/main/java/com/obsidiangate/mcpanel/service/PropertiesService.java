@@ -25,6 +25,29 @@ public class PropertiesService {
     private WorldRepository worldRepository;
 
     private final String propertiesPath = Paths.get(System.getProperty("user.dir"), "mc_server", "server.properties").toString();
+    private final String eulaPath = Paths.get(System.getProperty("user.dir"), "mc_server", "eula.txt").toString();
+
+    public void acceptEula() {
+        Properties eulaProps = new Properties();
+        File eulaFile = new File(eulaPath);
+
+        if (eulaFile.exists()) {
+            try (InputStream in = new FileInputStream(eulaFile)) {
+                eulaProps.load(in);
+            } catch (IOException e) {
+                System.err.println("Warning: Could not read eula.txt.");
+            }
+        }
+
+        eulaProps.setProperty("eula", "true");
+
+        try (OutputStream out = new FileOutputStream(eulaFile)) {
+            eulaProps.store(out, "By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/mc-eula).");
+            System.out.println("[OK] EULA has been accepted in: " + eulaPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Error writing to eula.txt", e);
+        }
+    }
 
     public void updateProperties() {
         propertiesConfig.setMotd(serverConfig.getDescription());

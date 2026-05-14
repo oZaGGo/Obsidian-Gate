@@ -38,10 +38,25 @@ public class InitConfigService {
 
     public void initConfig(String version, String geminiApiKey, String token) {
         System.out.println("--- Init Config Service ---");
-        createStartFolders();
-        downloadServerJar(version);
-        saveConfig(geminiApiKey);
-        completeSetup(token);
+        if (!checkIfSetupCompleted(token)) {
+            createStartFolders();
+            downloadServerJar(version);
+            saveConfig(geminiApiKey);
+            completeSetup(token);
+        } else {
+            System.out.println("[INFO] Setup already completed. Skipping initialization.");
+        }
+    }
+
+    private boolean checkIfSetupCompleted(String token) {
+        var userOpt = userAuthRepository.findByToken(token);
+
+        if (userOpt.isPresent()){
+            var user = userOpt.get();
+            return user.isSetupCompleted();
+        } else {
+            return false;
+        }
     }
 
     // Necessary folders for the server and backups

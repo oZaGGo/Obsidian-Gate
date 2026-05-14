@@ -2,10 +2,16 @@ package com.obsidiangate.mcpanel.service;
 
 import com.obsidiangate.mcpanel.config.AppConfig;
 import com.obsidiangate.mcpanel.config.ServerConfig;
+import com.obsidiangate.mcpanel.model.ServerConfigModel;
+import com.obsidiangate.mcpanel.model.World;
+import com.obsidiangate.mcpanel.repository.ServerConfigRepository;
+import com.obsidiangate.mcpanel.repository.WorldRepository;
 import com.obsidiangate.mcpanel.util.enumerator.ChatCommandType;
 import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
+import com.obsidiangate.mcpanel.util.listener.ApplicationReadyListener;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Paths;
@@ -29,6 +35,19 @@ public class ServerRuntimeService {
 
     @Autowired
     private LiveCommandService liveCommandService;
+
+    @Autowired
+    private ServerConfigRepository serverConfigRepository;
+
+    @Autowired
+    private PropertiesService propertiesService;
+
+    @Autowired
+    private WorldRepository worldRepository;
+
+    @Autowired
+    @Lazy
+    private WorldConfigService worldConfigService;
 
     private Process serverProcess;
     private final List<String> consoleLogs = new ArrayList<>();
@@ -286,16 +305,43 @@ public class ServerRuntimeService {
         }
     }
 
+    public void createDefaultWorld(){
+        World world = new World();
+
+        world.setName("world");
+        world.setDifficulty("normal");
+        world.setGamemode("survival");
+        world.setHardcore(false);
+        world.setCurrent(true);
+
+        worldRepository.save(world);
+
+        worldConfigService.setActiveWorld("world");
+
+        propertiesService.updateProperties();
+        propertiesService.saveToFile();
+
+        System.out.println("\n[First Setup] Default world created.");
+    }
+
     private void detectEula(String line) {
-        if (!line.contains("You need to agree to the EULA")) {
-            serverConfig.setEula(true);
+        if (line.contains("You need to agree to the EULA")) {
+            ServerConfigModel model = serverConfigRepository.findActiveConfig();
+            model.setEula(true);
+            serverConfigRepository.save(model);
         }else{
-            serverConfig.setEula(false);
+            ServerConfigModel model = serverConfigRepository.findActiveConfig();
+            model.setEula(false);
+            serverConfigRepository.save(model);
         }
 
     }
 
     public void acceptEula(){
-        serverConfig.setEula(true);
+        ServerConfigModel model = serverConfigRepository.findActiveConfig();
+        model.setEula(false);
+        serverConfigRepository.save(model);
+        propertiesService.acceptEula();
+        createDefaultWorld();
     }
 }

@@ -1,4 +1,3 @@
-/* --- Estructura del Modal (Dialog) --- */
 #dynamicModal {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color, #2d2f3f);
@@ -15,7 +14,6 @@
     backdrop-filter: blur(4px);
 }
 
-/* --- Elementos Internos --- */
 .modal-title {
     color: var(--accent);
     text-transform: uppercase;
@@ -35,7 +33,6 @@
     color: white;
 }
 
-/* --- Formulario --- */
 .modal-field {
     display: flex;
     flex-direction: column;
@@ -66,7 +63,6 @@
     outline: none;
 }
 
-/* --- Footer --- */
 .modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -74,7 +70,6 @@
     margin-top: 25px;
 }
 
-/* El botón de cancelar usa tu estilo de filtro */
 .modal-footer .btn-cancel {
     background: transparent;
     border: 1px solid #444;
@@ -90,3 +85,49 @@
 }
 
 .modal-header{display: none}
+
+.description {
+    font-size: 0.85rem;
+    color: var(--text-dim, #a0a0a0);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.eula-link-container {
+    background: rgba(125, 95, 255, 0.05); /* Un toque del color de ObsidianGate */
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px dashed rgba(125, 95, 255, 0.3);
+}
+
+.eula-link {
+    color: var(--accent, #7d5fff);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s;
+}
+
+.eula-link:hover {
+    color: #a29bfe;
+    text-decoration: underline;
+}
+
+.btn-save-small {
+    background: var(--accent, #7d5fff);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-save-small:hover {
+    background: #6c47ff;
+    box-shadow: 0 0 15px rgba(125, 95, 255, 0.4);
+}

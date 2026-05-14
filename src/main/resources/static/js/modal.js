@@ -33,7 +33,7 @@ async function openModal(templateName, parameters = {}) {
 
 async function initModalStructure(templateName, dialog, parameters) {
 
-    if (templateName=='changePassword') {
+    if (templateName == 'changePassword') {
         const userName = document.getElementById("userSelected")
         userName.innerText = parameters.username
 
@@ -45,19 +45,13 @@ async function initModalStructure(templateName, dialog, parameters) {
         }
     }
 
-    if (templateName=='acceptEula') {
+    if (templateName == 'acceptEula') {
 
         dialog.showModal()
 
-        const acceptEulaBtn = document.getElementById('btnAcceptEula')
-        if (acceptEulaBtn) {
-            acceptEulaBtn.onclick = () => alert("Thank you for accepting the EULA. You can now use the application.")
-        }
     }
 
 }
-
-
 
 async function changePassword(username) {
     const passwordInput = document.getElementById('newPassword') || document.querySelector('input[type="password"]')
@@ -99,28 +93,32 @@ async function changePassword(username) {
         console.error("Error:", e)
         alert("Connection error.")
     }
+}
 
-    async function acceptEula() {
-        try {
-            const response = await fetch(`${API_BASE}/eula/accept`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': localStorage.getItem('mc_token')
-                }
-            });
-
-            const data = await response.json()
-
-            if (response.ok) {
-                alert(data.message || "EULA accepted successfully")
-                document.getElementById('dynamicModal').close()
-            } else {
-                alert(data.message || "Error accepting EULA")
+async function acceptEula() {
+    try {
+        const response = await fetch(`/api/server/accept-eula`, {
+            method: 'POST',
+            headers: {
+                'Authorization': localStorage.getItem('mc_token')
             }
-        } catch (e) {
-            console.error("Error:", e)
-            alert("Connection error.")
-        }
-    }
+        });
 
+        const data = await response.json()
+
+        if (response.ok) {
+            alert(data.message || "EULA accepted successfully")
+            document.getElementById('dynamicModal').close()
+        } else {
+            alert(data.message || "Error accepting EULA")
+        }
+    } catch (e) {
+        console.error("Error:", e)
+        alert("Connection error.")
+    }
+}
+
+function declineEula() {
+    localStorage.setItem('eulaModalShown', false);
+    document.getElementById('dynamicModal').close();
 }

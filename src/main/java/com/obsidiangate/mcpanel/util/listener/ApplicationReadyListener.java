@@ -36,12 +36,6 @@ public class ApplicationReadyListener {
     @Autowired
     private UserAuthRepository userAuthRepository;
 
-    @Autowired
-    private WorldRepository worldRepository;
-
-    @Autowired
-    private WorldConfigService worldConfigService;
-
     public ApplicationReadyListener(Environment environment, AppConfig appConfig, ObjectMapper objectMapper) {
         this.environment = environment;
         this.appConfig = appConfig;
@@ -74,23 +68,6 @@ public class ApplicationReadyListener {
         System.out.println();
         printStartupBanner();
         System.out.println();
-    }
-
-
-    private void createDefaultWorld(){
-        World world = new World();
-
-        world.setName("world");
-        world.setDifficulty("normal");
-        world.setGamemode("survival");
-        world.setHardcore(false);
-        world.setCurrent(true);
-
-        worldRepository.save(world);
-
-        worldConfigService.setActiveWorld("world");
-
-        System.out.println("\n[First Setup] Default world created.");
     }
 
     private void createSystemUser(){

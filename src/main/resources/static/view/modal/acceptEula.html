@@ -1,11 +1,26 @@
-<div class="modal-header">
-    <a href="https://www.minecraft.net/es-es/eula" target="_blank">https://www.minecraft.net/es-es/eula</a>
+<h2 class="modal-title">Minecraft EULA</h2>
+<span class="modal-subtitle">Action required to <strong>initialize</strong> the server.</span>
+
+<div class="modal-body">
+    <p class="description">
+        To run a Minecraft server, you must agree to the Mojang End User License Agreement.
+        By clicking "Accept EULA", you acknowledge that you have read and agree to their terms and conditions.
+    </p>
+
+    <div class="modal-field eula-link-container">
+        <label>Review the terms here:</label>
+        <a href="https://www.minecraft.net/es-es/eula" target="_blank" class="eula-link">
+            Official Mojang EULA
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </a>
+    </div>
 </div>
+
 <div class="modal-footer">
-    <button type="button" class="btn-cancel" onclick="document.getElementById('dynamicModal').close();">
+    <button type="button" class="btn-cancel" onclick="declineEula()">
         Cancel
     </button>
-    <button type="submit" class="btn btn-save-small" id="btnAcceptEula">
-        Accept Eula
+    <button type="button" class="btn btn-save-small" id="btnAcceptEula" onclick="acceptEula()">
+        Accept EULA
     </button>
 </div>

@@ -92,20 +92,19 @@ public class ServerRuntimeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
+        serverConfig.refresh();
         List<String> logs = serverService.getLogs();
 
         return ResponseEntity.ok(Map.of("logs", logs, "eula", serverConfig.isEula()));
     }
 
-    @GetMapping("acceptEula")
+    @PostMapping("/accept-eula")
     public ResponseEntity<?> acceptEula(@RequestHeader("Authorization") String token) throws IOException, InterruptedException {
         if (!authService.authenticate(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
         serverService.acceptEula();
-
-        serverService.restartServer();
 
         return ResponseEntity.ok(Map.of("message", "EULA accepted"));
     }

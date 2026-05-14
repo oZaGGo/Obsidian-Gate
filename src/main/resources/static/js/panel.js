@@ -227,9 +227,16 @@ async function refreshMetrics() {
 
 // SERVER RUNTIME
 
+let serverStarted = false
+
 async function controlServer(action) {
     const token = localStorage.getItem('mc_token');
     setControlButtonsDisabled(true);
+
+    if (action === 'start') {
+        serverStarted = true
+    }
+
     try {
         const response = await fetch(`/api/server/control?action=${action}`, {
             method: 'POST',
@@ -249,6 +256,8 @@ async function controlServer(action) {
     }
 }
 
+localStorage.setItem('eulaModalShown', false);
+
 async function refreshLogs() {
     const consoleOutput = document.getElementById('console-output');
     if (!consoleOutput) return;
@@ -259,7 +268,8 @@ async function refreshLogs() {
         });
         const {logs, eula} = await response.json();
 
-        if(eula){
+        if(eula && localStorage.getItem('eulaModalShown') == 'false' && serverStarted) {
+            localStorage.setItem('eulaModalShown', true);
             await openModal('acceptEula');
         }
 
