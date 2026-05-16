@@ -75,9 +75,7 @@ const router = {
         if (viewName === 'backup') {
             loadCurrentSchedule()
             updateBackupWorldSelect()
-            setInterval(async () => {
-                loadBackups()
-            }, 300);
+            loadBackups()
         }
 
         if (viewName === 'security') {
@@ -969,6 +967,7 @@ async function createBackup() {
             alert("Backup created successfully");
             nameInput.value = '';
         } else {
+            loadBackups()
             const errorData = await response.text();
             alert("Error creating backup: " + errorData);
         }
@@ -1063,36 +1062,47 @@ function renderBackupTable(backups) {
         row.style.borderBottom = "1px solid #222";
 
         const tdAlias = document.createElement('td');
-        tdAlias.style.cssText = "color: #e0e0e0; font-weight: 600; padding: 12px;";
+        tdAlias.style.cssText = "color: #e0e0e0; font-weight: 600; padding: 12px; white-space: normal; word-break: break-word;";
         tdAlias.textContent = b.alias;
 
         const tdWorld = document.createElement('td');
-        tdWorld.style.color = "#5fc78f";
+        tdWorld.style.cssText = "color: #5fc78f; white-space: normal; word-break: break-word;";
         tdWorld.textContent = b.world;
 
         const tdFile = document.createElement('td');
-        tdFile.style.cssText = "font-size: 0.85em; color: #888;";
+        tdFile.style.cssText = "font-size: 0.85em; color: #888; padding: 12px 5px; white-space: normal; word-break: break-all;";
         tdFile.textContent = b.path;
 
         const tdDate = document.createElement('td');
+        tdDate.style.cssText = "white-space: normal; padding: 12px 5px;";
         tdDate.textContent = formatDate(b.backupDate);
 
         const tdSize = document.createElement('td');
+        tdSize.style.padding = "12px 5px";
         tdSize.textContent = formatBytes(b.size);
 
         const tdActions = document.createElement('td');
-        tdActions.style.cssText = "text-align: right; display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 12px 0;";
+        tdActions.style.cssText = "text-align: right; display: flex; gap: 8px; justify-content: flex-end; padding: 12px 20px 12px 0; width: 280px; box-sizing: border-box; flex-shrink: 0;";
+
+        const btnDownload = document.createElement('button');
+        btnDownload.className = 'btn-filter';
+        btnDownload.style.cssText = "border-color: #5fc78f; color: #5fc78f; padding: 6px 12px; flex-shrink: 0;";
+        btnDownload.innerHTML = '<i class="fas fa-download"></i> Download';
+        btnDownload.onclick = () => downloadBackup(b.alias);
 
         const btnRestore = document.createElement('button');
         btnRestore.className = 'btn-select';
+        btnRestore.style.cssText = "flex-shrink: 0;";
         btnRestore.innerHTML = '<i class="fas fa-undo-alt"></i> Restore';
         btnRestore.onclick = () => restoreBackup(b.alias, b.world);
 
         const btnDelete = document.createElement('button');
         btnDelete.className = 'btn-delete';
+        btnDelete.style.cssText = "flex-shrink: 0;";
         btnDelete.innerHTML = '<i class="fas fa-trash"></i> Delete';
         btnDelete.onclick = () => deleteBackup(b.alias);
 
+        tdActions.appendChild(btnDownload);
         tdActions.appendChild(btnRestore);
         tdActions.appendChild(btnDelete);
 
@@ -1165,6 +1175,46 @@ async function deleteBackup(alias) {
     } catch (error) {
         console.error("Delete error:", error);
         alert("Server error during deletion");
+    }
+}
+
+async function downloadBackup(alias) {
+    const token = localStorage.getItem('mc_token');
+
+    try {
+        const response = await fetch(`/api/backup/download?alias=${encodeURIComponent(alias)}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let fileName = `${alias}.zip`;
+            if (contentDisposition && contentDisposition.includes('filename=')) {
+                fileName = contentDisposition.split('filename=')[1].replaceAll('"', '').trim();
+            }
+
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } else {
+            const errorData = await response.text();
+            alert("Error downloading backup: " + errorData);
+        }
+    } catch (error) {
+        console.error("Download error:", error);
+        alert("Server error during download");
     }
 }
 

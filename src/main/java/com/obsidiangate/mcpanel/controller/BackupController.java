@@ -7,6 +7,7 @@ import com.obsidiangate.mcpanel.service.LogService;
 import com.obsidiangate.mcpanel.service.WorldManagementService;
 import com.obsidiangate.mcpanel.util.enumerator.LogEntryType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -117,6 +118,36 @@ public class BackupController {
             worldManagementService.deleteBackup(alias);
             logService.registerEntry(token, "Deleted Backup: " + alias, LogEntryType.WORLDMANAGEMENT);
             return ResponseEntity.ok(Map.of("message", "Backup deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<?> downloadBackup(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String alias) {
+
+        if (!authService.authenticate(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        if (!authService.isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        try {
+            Resource resource = worldManagementService.loadBackupAsResource(alias);
+            String fileName = worldManagementService.getBackupFileName(alias);
+
+            logService.registerEntry(token, "Downloaded Backup: " + alias, LogEntryType.WORLDMANAGEMENT);
+
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
+                    .contentLength(resource.contentLength())
+                    .body(resource);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

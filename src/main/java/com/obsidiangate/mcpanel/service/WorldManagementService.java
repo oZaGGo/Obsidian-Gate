@@ -5,6 +5,7 @@ import com.obsidiangate.mcpanel.model.Backup;
 import com.obsidiangate.mcpanel.repository.BackupRepository;
 import com.obsidiangate.mcpanel.util.system.ZipCompressor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -177,6 +178,25 @@ public class WorldManagementService {
         } catch (IOException e) {
             throw new RuntimeException("Could not delete backup file: " + e.getMessage());
         }
+    }
+
+    public org.springframework.core.io.Resource loadBackupAsResource(String alias) {
+        Backup backup = backupRepository.findByAlias(alias)
+                .orElseThrow(() -> new RuntimeException("Backup record not found in database with alias: " + alias));
+
+        File file = new File(backup.getPath());
+        if (!file.exists()) {
+            throw new RuntimeException("The physical backup file does not exist on disk.");
+        }
+
+        return new FileSystemResource(file);
+    }
+
+    public String getBackupFileName(String alias) {
+        Backup backup = backupRepository.findByAlias(alias)
+                .orElseThrow(() -> new RuntimeException("Backup record not found in database with alias: " + alias));
+
+        return Paths.get(backup.getPath()).getFileName().toString();
     }
 
     public boolean isBackupFinished() {
