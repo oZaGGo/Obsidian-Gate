@@ -11,4 +11,5 @@ public class ServerConfigDTO {
     private Integer simulationDistance;
     private Integer maxPlayers;
     private Integer serverPort;
+    private Integer spawnProtection;
 }

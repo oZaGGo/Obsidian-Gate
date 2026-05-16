@@ -22,6 +22,7 @@ public class ServerConfig {
     private int simulationDistance;
     private int maxPlayers = 20;
     private int serverPort = 25565;
+    private int spawnProtection = 25565;
     private boolean eula = false;
 
     @PostConstruct
@@ -41,6 +42,7 @@ public class ServerConfig {
             this.simulationDistance = model.getSimulationDistance();
             this.maxPlayers = model.getMaxPlayers();
             this.serverPort = model.getServerPort();
+            this.spawnProtection = model.getSpawnProtection();
             this.eula = model.isEula();
         } else {
             // If bd is empty
@@ -52,6 +54,7 @@ public class ServerConfig {
             this.simulationDistance = 10;
             this.maxPlayers = 20;
             this.serverPort = 25565;
+            this.spawnProtection = 16;
             this.eula = false;
         }
     }

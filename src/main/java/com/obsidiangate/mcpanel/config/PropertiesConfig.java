@@ -21,5 +21,5 @@ public class PropertiesConfig {
     private String viewDistance;
     private String simulationDistance;
     private String serverPort = "25565";
-
+    private String spawnProtection = "16";
 }

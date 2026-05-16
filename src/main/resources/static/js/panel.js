@@ -406,6 +406,7 @@ async function loadSettings() {
         document.getElementById('set-sim').value = data.simulationDistance;
         document.getElementById('set-players').value = data.maxPlayers;
         document.getElementById('set-rcon').value = data.serverPort;
+        document.getElementById('set-spawn').value = data.spawnProtection;
 
         document.querySelectorAll('output').forEach(out => {
             const input = out.previousElementSibling;
@@ -477,7 +478,8 @@ async function saveSettings() {
         renderDistance: parseInt(document.getElementById('set-render').value),
         simulationDistance: parseInt(document.getElementById('set-sim').value),
         maxPlayers: parseInt(document.getElementById('set-players').value),
-        serverPort: parseInt(document.getElementById('set-rcon').value)
+        serverPort: parseInt(document.getElementById('set-rcon').value),
+        spawnProtection: parseInt(document.getElementById('set-spawn').value)
     };
 
     try {

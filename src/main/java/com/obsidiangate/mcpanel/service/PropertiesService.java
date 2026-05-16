@@ -55,6 +55,7 @@ public class PropertiesService {
         propertiesConfig.setViewDistance(String.valueOf(serverConfig.getRenderDistance()));
         propertiesConfig.setSimulationDistance(String.valueOf(serverConfig.getSimulationDistance()));
         propertiesConfig.setServerPort(String.valueOf(serverConfig.getServerPort()));
+        propertiesConfig.setSpawnProtection(String.valueOf(serverConfig.getSpawnProtection()));
 
 
         World worldConfig = worldRepository.findCurrentWorld().orElse(null);

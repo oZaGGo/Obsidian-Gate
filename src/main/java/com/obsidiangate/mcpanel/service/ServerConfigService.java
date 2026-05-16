@@ -69,6 +69,10 @@ public class ServerConfigService {
             current.setServerPort(dto.getServerPort());
         }
 
+        if (dto.getSpawnProtection() != null) {
+            current.setSpawnProtection(dto.getSpawnProtection());
+        }
+
         repository.save(current);
         serverConfigInApp.refresh();
         propertiesService.updateProperties();

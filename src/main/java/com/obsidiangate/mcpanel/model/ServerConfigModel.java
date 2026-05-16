@@ -48,6 +48,10 @@ public class ServerConfigModel {
 
     @Builder.Default
     @Column(nullable = false)
+    private Integer spawnProtection = 16;
+
+    @Builder.Default
+    @Column(nullable = false)
     private boolean firstSetup = true;
 
     @Builder.Default
