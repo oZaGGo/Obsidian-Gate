@@ -36,8 +36,6 @@ public class WorldManagementService {
 
     private boolean isProcessingBackup = false;
 
-    private boolean backupThreadFailed = false;
-
     public void deleteWorldFolder(String worldName) {
         Path worldPath = Paths.get(System.getProperty("user.dir"), "mc_server", worldName);
 
@@ -71,7 +69,6 @@ public class WorldManagementService {
     public void createBackup(String name, String alias) {
         new Thread(() -> {
             isProcessingBackup = true;
-            backupThreadFailed = false;
 
             try {
                 Path worldPath = Paths.get(serverPath, name);
@@ -82,7 +79,7 @@ public class WorldManagementService {
                 if (serverRuntimeService.isRunning()) {
                     serverRuntimeService.sendCommand("save-off");
                     // Attempt to save the world before compression
-                    String response = serverRuntimeService.sendCommandWithResponse("save-all", "Saved the game", 500);
+                    String response = serverRuntimeService.sendCommandWithResponse("save-all flush", "Saved the game", 500);
 
                     if (!response.isEmpty()) {
                         boolean success = zipCompressor.getZip(worldPath, pathFinal, serverRuntimeService, this, name, zipName);
@@ -116,15 +113,10 @@ public class WorldManagementService {
     }
 
     private void cleanupFailedBackup() {
-        backupThreadFailed = true;
         isProcessingBackup = false;
         if (serverRuntimeService.isRunning()) {
             serverRuntimeService.sendCommand("save-on");
         }
-    }
-
-    public boolean didBackupThreadFail() {
-        return backupThreadFailed;
     }
 
     public void registerBackupInDatabase(Path path, String alias, String worldName) {

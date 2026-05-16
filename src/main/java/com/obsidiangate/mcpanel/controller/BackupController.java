@@ -45,9 +45,6 @@ public class BackupController {
 
             if (worldManagementService.isBackupFinished()) {
                 worldManagementService.createBackup(name, alias);
-                if (worldManagementService.didBackupThreadFail()) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Backup process failed.");
-                }
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A backup is already in progress. Please wait until it finishes.");
             }

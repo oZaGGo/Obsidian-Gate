@@ -33,16 +33,17 @@ public class ZipCompressor {
             Files.walk(worldPath)
                     .filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(worldPath.relativize(path).toString());
-                        try {
-                            zos.putNextEntry(zipEntry);
-                            Files.copy(path, zos);
-                            zos.closeEntry();
-                        } catch (IOException e) {
-                            throw new RuntimeException("Can't copy files: " + e.getMessage());
+                        if (!worldPath.relativize(path).toString().endsWith(".lock")) {
+                            ZipEntry zipEntry = new ZipEntry(worldPath.relativize(path).toString());
+                            try {
+                                zos.putNextEntry(zipEntry);
+                                Files.copy(path, zos);
+                                zos.closeEntry();
+                            } catch (IOException e) {
+                                throw new RuntimeException("Can't copy files: "+ zipEntry + e.getMessage());
+                            }
                         }
                     });
-
             if (serverRuntimeService != null) {
                 serverRuntimeService.sendCommand("save-on");
             }
