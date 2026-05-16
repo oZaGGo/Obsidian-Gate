@@ -33,6 +33,14 @@
 <script src="js/auth.js"></script>
 
 <script>
+
+    token = localStorage.getItem('mc_token');
+
+    if (token == null) {
+        window.location.href = "view/register.html";
+    }
+
+
     document.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleLogin();
     });

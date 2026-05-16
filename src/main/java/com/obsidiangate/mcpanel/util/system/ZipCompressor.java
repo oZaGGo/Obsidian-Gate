@@ -47,7 +47,6 @@ public class ZipCompressor {
                 serverRuntimeService.sendCommand("save-on");
             }
             worldManagementService.backupFinished();
-            worldManagementService.registerBackupInDatabase(outputPath, zipName, worldName);
             return true;
         } catch (IOException e) {
             if (serverRuntimeService != null) {

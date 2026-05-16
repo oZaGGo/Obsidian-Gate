@@ -57,6 +57,17 @@ public class AuthService {
 
     }
 
+    public boolean userSetupCompleted(String token) {
+        Optional<UserAuth> userOpt = userRepository.findByToken(token);
+
+        if (userOpt.isPresent()) {
+            UserAuth user = userOpt.get();
+            return user.isSetupCompleted();
+        }
+
+        return false;
+    }
+
     public String register(UserDTO userDto){
 
         if (userRepository.findByUsername(userDto.getUsername()).isPresent() || !serverConfig.isFirstSetup() || userDto.getPassword().length() < 8) {

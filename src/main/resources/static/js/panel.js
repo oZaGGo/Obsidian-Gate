@@ -50,7 +50,7 @@ const router = {
             loadWorldView()
 
             let debounceTimer;
-            document.getElementById('world-name').addEventListener('input', function(e) {
+            document.getElementById('world-name').addEventListener('input', function (e) {
                 const name = e.target.value.trim();
                 const inputElement = e.target;
 
@@ -72,10 +72,12 @@ const router = {
 
             });
         }
-        if(viewName === 'backup'){
-            updateBackupWorldSelect()
-            loadBackups()
-            loadCurrentSchedule();
+        if (viewName === 'backup') {
+            setTimeout(async () => {
+                updateBackupWorldSelect()
+                loadBackups()
+                loadCurrentSchedule();
+            }, 300);
         }
 
         if (viewName === 'security') {
@@ -87,11 +89,11 @@ const router = {
             //First load
 
             const initialBtn = document.querySelector('.btn-filter.active');
-            if(initialBtn) filterLogs(null, initialBtn);
+            if (initialBtn) filterLogs(null, initialBtn);
 
             document.addEventListener('DOMContentLoaded', () => {
                 const initialBtn = document.querySelector('.btn-filter.active');
-                if(initialBtn) filterLogs(null, initialBtn);
+                if (initialBtn) filterLogs(null, initialBtn);
             });
         }
     }
@@ -134,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     router.load('home');
 
-    if (online){
+    if (online) {
         refreshMetrics();
     }
     checkServerStatus();
@@ -147,14 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
         checkAdminPermissions();
 
         if (document.getElementById('cpu-usage')) {
-            if (online){
+            checkServerStatus();
+            if (online) {
                 refreshMetrics()
-                checkServerStatus();
                 refreshLogs();
             }
         }
 
-        if (document.getElementById('log-list-body')){
+        if (document.getElementById('log-list-body')) {
             filterLogs(logType, document.querySelector('.btn-filter.active'));
         }
     }, 500);
@@ -251,7 +253,7 @@ async function controlServer(action) {
         }
     } catch (e) {
         console.error("Server error", e);
-    }finally {
+    } finally {
         setControlButtonsDisabled(false);
     }
 }
@@ -266,9 +268,9 @@ async function refreshLogs() {
         const response = await fetch('/api/server/logs', {
             headers: { 'Authorization': localStorage.getItem('mc_token') }
         });
-        const {logs, eula} = await response.json();
+        const { logs, eula } = await response.json();
 
-        if(eula && localStorage.getItem('eulaModalShown') == 'false' && serverStarted) {
+        if (eula && localStorage.getItem('eulaModalShown') == 'false' && serverStarted) {
             localStorage.setItem('eulaModalShown', true);
             await openModal('acceptEula');
         }
@@ -287,7 +289,7 @@ async function refreshLogs() {
     }
 }
 
-function moveScroll(){
+function moveScroll() {
     const consoleOutput = document.getElementById('console-output');
     consoleOutput.scrollTo({
         top: consoleOutput.scrollHeight,
@@ -409,7 +411,7 @@ async function loadSettings() {
 
         document.querySelectorAll('output').forEach(out => {
             const input = out.previousElementSibling;
-            if(input.type === 'range') out.value = input.value;
+            if (input.type === 'range') out.value = input.value;
         });
     } catch (e) {
         console.error("Error loading settings");
@@ -421,7 +423,7 @@ function handleIconSelection(event) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         document.getElementById('settings-icon-preview').src = e.target.result;
     };
     reader.readAsDataURL(file);
@@ -455,9 +457,9 @@ async function uploadIcon() {
             const timestamp = new Date().getTime();
             const newUrl = `/api/config/icon?t=${timestamp}`;
 
-            if(document.getElementById('settings-icon-preview'))
+            if (document.getElementById('settings-icon-preview'))
                 document.getElementById('settings-icon-preview').src = newUrl;
-            if(document.getElementById('dashboard-icon'))
+            if (document.getElementById('dashboard-icon'))
                 document.getElementById('dashboard-icon').src = newUrl;
 
         } else {
@@ -797,7 +799,7 @@ async function loadUsers() {
             btnChangePassword.innerHTML = '<i class="fas fa-trash"></i> Change password'
 
             btnChangePassword.onclick = async () => {
-                await openModal('changePassword', { username: user.username.toString()})
+                await openModal('changePassword', { username: user.username.toString() })
             }
 
             actionsCell.appendChild(btnChangePassword)
@@ -963,7 +965,7 @@ async function createBackup() {
         });
 
         if (response.ok) {
-            await loadBackups()
+            loadBackups()
             alert("Backup created successfully");
             nameInput.value = '';
         } else {
@@ -1012,7 +1014,7 @@ async function updateBackupWorldSelect() {
         backupSelect.appendChild(option);
     });
 
-    backupSelect.addEventListener('change', function() {
+    backupSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         this.style.color = selectedOption.dataset.active === "true" ? "#5fc78f" : "white";
     });
@@ -1086,7 +1088,7 @@ function renderBackupTable(backups) {
         const btnRestore = document.createElement('button');
         btnRestore.className = 'btn-select';
         btnRestore.innerHTML = '<i class="fas fa-undo-alt"></i> Restore';
-        btnRestore.onclick = () => restoreBackup(b.alias,b.world);
+        btnRestore.onclick = () => restoreBackup(b.alias, b.world);
 
         const btnDelete = document.createElement('button');
         btnDelete.className = 'btn-delete';
@@ -1259,7 +1261,7 @@ async function requestUpdate() {
                 try {
                     const res = await fetch('/api/version');
                     if (res.ok) window.location.reload();
-                } catch (e) {}
+                } catch (e) { }
             }, 10000);
         }
     } catch (error) {

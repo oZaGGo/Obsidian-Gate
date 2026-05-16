@@ -15,6 +15,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ public class InitConfigService {
         if (!checkIfSetupCompleted(token)) {
             createStartFolders();
             downloadServerJar(version);
+            copyServerIcon();
             saveConfig(geminiApiKey);
             completeSetup(token);
         } else {
@@ -116,6 +118,22 @@ public class InitConfigService {
         try (ReadableByteChannel rbc = Channels.newChannel(url.openStream());
              FileOutputStream fos = new FileOutputStream(targetPath.toFile())) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        }
+    }
+
+    private void copyServerIcon() {
+        Path sourcePath = Paths.get(System.getProperty("user.dir"), "server-icon.png");
+        Path targetPath = Paths.get(serverPath, "server-icon.png");
+
+        try {
+            if (Files.exists(sourcePath)) {
+                Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("[OK] server-icon.png successfully copied to mc_server folder.");
+            } else {
+                System.out.println("[WARN] server-icon.png not found in project root. Skipping icon setup.");
+            }
+        } catch (IOException e) {
+            System.err.println("[ERROR] Failed to copy server-icon.png: " + e.getMessage());
         }
     }
 

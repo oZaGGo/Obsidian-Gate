@@ -1,3 +1,24 @@
+// Check if user is already configured
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('mc_token');
+    if (!token) {
+        window.location.href = "../register.html";
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/setup?token=' + token);
+        const data = await response.json();
+        if (data.setupCompleted) {
+            window.location.href = "../view/panel.html";
+        }
+    } catch (error) {
+        alert("Server error");
+    }
+});
+
+
+
 // Portal animation
 async function initPortal() {
     const entryScreen = document.getElementById('entry-screen');

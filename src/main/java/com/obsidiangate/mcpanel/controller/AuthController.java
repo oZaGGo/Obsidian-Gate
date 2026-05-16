@@ -114,6 +114,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
     }
+
     @PostMapping("/password")
     public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token, @RequestBody UserDTO user) {
         if (!authService.authenticate(token)) {
@@ -134,6 +135,11 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok().body(Map.of("admin", authService.isAdmin(token)));
+    }
+
+    @GetMapping("/setup")
+    public ResponseEntity<Map<String, Boolean>> setup(@RequestParam("token") String token) {
+        return ResponseEntity.ok().body(Map.of("setupCompleted", authService.userSetupCompleted(token)));
     }
 
     private String getClientIP(HttpServletRequest request) {
