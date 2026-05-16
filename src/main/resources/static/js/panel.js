@@ -38,7 +38,7 @@ const router = {
         });
     },
 
-    initViewLogic(viewName) {
+    async initViewLogic(viewName) {
         if (viewName === 'home') {
             refreshLogs();
             moveScroll();
@@ -73,10 +73,10 @@ const router = {
             });
         }
         if (viewName === 'backup') {
-            setTimeout(async () => {
-                updateBackupWorldSelect()
+            loadCurrentSchedule()
+            updateBackupWorldSelect()
+            setInterval(async () => {
                 loadBackups()
-                loadCurrentSchedule();
             }, 300);
         }
 
@@ -407,7 +407,7 @@ async function loadSettings() {
         document.getElementById('set-render').value = data.renderDistance;
         document.getElementById('set-sim').value = data.simulationDistance;
         document.getElementById('set-players').value = data.maxPlayers;
-        document.getElementById('set-rcon').value = data.rconPort;
+        document.getElementById('set-rcon').value = data.serverPort;
 
         document.querySelectorAll('output').forEach(out => {
             const input = out.previousElementSibling;
@@ -1032,8 +1032,6 @@ async function loadBackups() {
 
         if (response.ok) {
             const backups = await response.json();
-
-            console.log("Loaded backups:", backups);
             renderBackupTable(backups);
         } else {
             console.error("Failed to load backups");
