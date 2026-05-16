@@ -80,7 +80,7 @@ public class WorldManagementService {
                 if (serverRuntimeService.isRunning()) {
                     serverRuntimeService.sendCommand("save-off");
                     // Attempt to save the world before compression
-                    String response = serverRuntimeService.sendCommandWithResponse("save-all flush", "Saved the game", 500);
+                    String response = serverRuntimeService.sendCommandWithResponse("save-all", "Saved the game", 500);
 
                     if (!response.isEmpty()) {
                         boolean success = zipCompressor.getZip(worldPath, pathFinal, serverRuntimeService, this, name, zipName);
