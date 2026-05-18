@@ -46,9 +46,16 @@ async function initModalStructure(templateName, dialog, parameters) {
     }
 
     if (templateName == 'acceptEula') {
-
         dialog.showModal()
+    }
 
+    if (templateName == 'downloadProgress') {
+        dialog.showModal();
+
+        const closeBtn = document.getElementById('closeDynamicModal');
+        if (closeBtn) {
+            closeBtn.style.display = 'none';
+        }
     }
 
 }

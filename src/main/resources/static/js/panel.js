@@ -1183,6 +1183,14 @@ async function deleteBackup(alias) {
 async function downloadBackup(alias) {
     const token = localStorage.getItem('mc_token');
 
+    await openModal('downloadProgress', { alias });
+
+    const statusText = document.getElementById('downloadStatusText');
+    const progressBarFill = document.getElementById('downloadProgressBarFill');
+    const progressDetails = document.getElementById('downloadProgressDetails');
+    const dialog = document.getElementById('dynamicModal');
+    const closeBtn = document.getElementById('closeDynamicModal');
+
     try {
         const response = await fetch(`/api/backup/download?alias=${encodeURIComponent(alias)}`, {
             method: 'GET',
@@ -1191,32 +1199,78 @@ async function downloadBackup(alias) {
             }
         });
 
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let fileName = `${alias}.zip`;
-            if (contentDisposition && contentDisposition.includes('filename=')) {
-                fileName = contentDisposition.split('filename=')[1].replaceAll('"', '').trim();
-            }
-
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        } else {
+        if (!response.ok) {
             const errorData = await response.text();
-            alert("Error downloading backup: " + errorData);
+            throw new Error(errorData || "Failed to initialize download.");
         }
+
+        const contentLength = response.headers.get('Content-Length');
+        const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+
+        const reader = response.body.getReader();
+        let receivedLength = 0;
+        let chunks = [];
+
+        if (statusText) statusText.innerText = "Downloading data chunks...";
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            chunks.push(value);
+            receivedLength += value.length;
+
+            if (totalBytes > 0) {
+                const progressPercentage = (receivedLength / totalBytes) * 100;
+                if (progressBarFill) progressBarFill.style.width = `${progressPercentage}%`;
+                if (statusText) statusText.innerText = `Downloading... ${Math.round(progressPercentage)}%`;
+
+                const receivedMB = (receivedLength / (1024 * 1024)).toFixed(2);
+                const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+                if (progressDetails) progressDetails.innerText = `${receivedMB} MB / ${totalMB} MB`;
+            } else {
+                const receivedMB = (receivedLength / (1024 * 1024)).toFixed(2);
+                if (progressDetails) progressDetails.innerText = `${receivedMB} MB downloaded`;
+            }
+        }
+
+        if (progressBarFill) progressBarFill.style.width = '100%';
+        if (statusText) statusText.innerText = "Download complete! 100%";
+        if (totalBytes > 0 && progressDetails) {
+            const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+            progressDetails.innerText = `${totalMB} MB / ${totalMB} MB`;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        if (statusText) statusText.innerText = "Reassembling file...";
+        const blob = new Blob(chunks, { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let fileName = `${alias}.zip`;
+        if (contentDisposition && contentDisposition.includes('filename=')) {
+            fileName = contentDisposition.split('filename=')[1].replaceAll('"', '').trim();
+        }
+
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        if (dialog) dialog.close();
+
     } catch (error) {
         console.error("Download error:", error);
-        alert("Server error during download");
+        alert("Error during download: " + error.message);
+        if (dialog) dialog.close();
+    } finally {
+        if (closeBtn) closeBtn.style.display = '';
     }
 }
 
